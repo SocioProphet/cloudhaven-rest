@@ -24,7 +24,7 @@ export class VendorAppMgr extends BaseAction{
             var file = req.files.logo;
             application.logo = file.data;
             application.mimeType = file.mimetype;
-          } else {
+          } else if (req.body.logoUpdated=='true') {
             application.logo = null;
             application.mimeType = '';
           }

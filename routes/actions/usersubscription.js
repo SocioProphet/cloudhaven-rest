@@ -41,7 +41,7 @@ export class UserSubscription extends BaseAction{
         User.findOneAndUpdate(
           { _id:mongoose.Types.ObjectId(req.body.userId), 
             subscribedApps:{$not:{$elemMatch:{'application':req.body.applicationId}}}}, 
-          {$push:{subscribedApps:{vendor:vendorId, application:req.body.applicationId}}}, {new:true})
+          {$push:{subscribedApps:{vendor:req.body.vendorId, application:req.body.applicationId}}}, {new:true})
         .then(user=>{
           if (!user) {
             res.json({success:false, errMsg:`Failed to subscribe to application.`});

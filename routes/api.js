@@ -6,6 +6,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from "../models/user";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
+import VendorApp from './actions/vendorapp.js'
 import { UserInfo } from './actions/userinfo.js'
 import { Reports } from './actions/reports.js'
 import { VendorContactMgr } from './actions/vendorcontact'
@@ -96,6 +97,7 @@ export default function() {
     router.use( '/auditlog', new AuditLogReview().route());
     router.use( '/eventlog', new EventLogReview().route());
 
+    router.use( '/vendorapp', new VendorApp().route());
     router.use( '/userinfo', new UserInfo().route());
     router.use( '/reports', new Reports().route());
     router.use( '/vendorcontact', new VendorContactMgr().route());
