@@ -29,7 +29,7 @@ const uiMethods = {
       },
       submitForm: {
         args:[],
-        body: `debugger; this._appPost('submitform', this.formData, function(ui, data) { alert('result: '+data.success);});`
+        body: `this._appPost('submitform', this.formData, function(ui, data) { alert('result: '+data.success);});`
       },
     };
 
@@ -162,7 +162,7 @@ export default class VendorApp {
     });
 
     this.router.post("/submitform", (req, res) => {
-      console.log('Form data:\n'+req.body);
+      console.log('Form data:\n'+JSON.stringify(req.body));
       res.json({success:true})
     });
 
