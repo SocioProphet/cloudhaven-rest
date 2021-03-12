@@ -38,7 +38,7 @@ export class UserDataMgr extends BaseAction{
     this.router.post("/batchget", (req, res) => {
 //      if (this.getToken(req.headers)) {
         var userId = mongoose.Types.ObjectId(req.body.userId);
-        var filter = {$or: req.body.tokenIds.map(name=>({user:userId, name:name}))}
+        var filter = req.body.tokenIds?{$or: req.body.tokenIds.map(name=>({user:userId, name:name}))}:{};
         UserData.find(filter)
         .then((userDataList)=>{
           res.json(userDataList)
