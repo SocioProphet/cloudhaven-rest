@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import User from "../models/user";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
 import VendorApp from './actions/vendorapp.js'
+import { UserDataMgr } from './actions/userdata.js'
 import { UserInfo } from './actions/userinfo.js'
 import { Reports } from './actions/reports.js'
 import { VendorContactMgr } from './actions/vendorcontact'
@@ -99,6 +100,7 @@ export default function() {
 
     router.use( '/vendorapp', new VendorApp().route());
     router.use( '/userinfo', new UserInfo().route());
+    router.use( '/userdata', new UserDataMgr().route());
     router.use( '/reports', new Reports().route());
     router.use( '/vendorcontact', new VendorContactMgr().route());
     router.use( '/usersubscription', new UserSubscription().route());

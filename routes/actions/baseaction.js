@@ -32,7 +32,11 @@ export default class BaseController{
     }
 
     authenticate(roles, sourceTag) {
-      return checkRoleWithPassport({authData:this.authData, user:this.authData.user, roles:roles}, passport, sourceTag );
+      var ad = this.authData;
+      var retVal = checkRoleWithPassport({authData:this.authData, user:this.authData.user, roles:roles}, passport, sourceTag );
+      var a = this.authData;
+      var x = '';
+      return retVal;
     }
 
     logAuditData( model, recordId, operation, dataObj) {

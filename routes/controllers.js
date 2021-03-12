@@ -1,4 +1,4 @@
-import BaseController  from './base';
+import BaseController  from './basecontroller';
 import User from '../models/user'
 import Vendor from '../models/vendor';
 import AuditLog from '../models/auditlog'

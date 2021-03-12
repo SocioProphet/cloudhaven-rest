@@ -1,7 +1,7 @@
 
 
 const dataModel = {
-      cardTitle: 'Card Title...',
+      cardTitle: 'CloudHaven Example App',
       headers: [
         { text: 'First Name', value:'firstName', sortable: true },
         { text: 'Last Name', value:'lastName', sortable: true },
@@ -10,23 +10,25 @@ const dataModel = {
       items: [
         {firstName:'Big', lastName: 'Bork', address: '1234 Bork Street, Bob City, CA 99999'},
 
-      ]
+      ],
+      formData: {
+        $t_textField1: '',
+        textField2: '',
+        $t_textField3: '',
+        textField4: ''
+      }
     };
 const uiMethods = {
       initialize: {
         args:[],
         body: `
-        this.items = [
-          {firstName:'Bob', lastName: 'Smith', address: '1234 Bob Street, Bob City, CA 99999'},
-          {firstName:'Dave', lastName: 'Anderson', address: '9999 Dave Street, Some City, CA 99999'},
-          {firstName:'Xaviar', lastName: 'Gomez', address: '7777 Xav Street, Gomez City, CA 99999'}
-        ];`
+        this._appGet('formData', function(data) {
+          this.items = data;
+        })`
       },
       submitForm: {
         args:[],
-        body: `
-          this._appPost('submitForm', this.formData);
-        ];`
+        body: `debugger; this._appPost('submitform', this.formData, function(data) { alert('result: '+data.success);});`
       },
     };
 
@@ -64,6 +66,7 @@ const uiConfig = {
                           contents: [
                             {
                               component: 'textField',
+                              vmodel: 'formData.$t_textField1',
                               props: {
                                 dense: true,
                                 outlined: false,
@@ -71,6 +74,7 @@ const uiConfig = {
                               }},
                               {
                               component: 'textField',
+                              vmodel: 'formData.textField2',
                               props: {
                                 dense: true,
                                 outlined: false,
@@ -84,6 +88,7 @@ const uiConfig = {
                           contents: [
                             {
                               component: 'textField',
+                              vmodel: 'formData.$t_textField3',
                               props: {
                                 dense: true,
                                 outlined: false,
@@ -91,6 +96,7 @@ const uiConfig = {
                               }},
                               {
                               component: 'textField',
+                              vmodel: 'formData.textField4',
                               props: {
                                 dense: true,
                                 outlined: false,
@@ -115,6 +121,9 @@ const uiConfig = {
               },
               {
                 component: 'button',
+                on: {
+                  click: 'this.submitForm'
+                },
                 contents: 'Save'
               }
               ]
@@ -141,6 +150,19 @@ export default class VendorApp {
     this.router.get("/", (req, res) => {
       res.json(uiConfig)
     });
+    this.router.get("/formData", (req, res) => {
+      res.json([
+        {firstName:'Bob', lastName: 'Smith', address: '1234 Bob Street, Bob City, CA 99999'},
+        {firstName:'Dave', lastName: 'Anderson', address: '9999 Dave Street, Some City, CA 99999'},
+        {firstName:'Xaviar', lastName: 'Gomez', address: '7777 Xav Street, Gomez City, CA 99999'}
+      ]);
+    });
+
+    this.router.post("/submitform", (req, res) => {
+      console.log('Form data:\n'+req.body);
+      res.json({success:true})
+    });
+
     return this.router;
   }
 }  

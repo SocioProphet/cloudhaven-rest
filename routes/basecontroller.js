@@ -154,10 +154,11 @@ export default class BaseController{
 
   route(){
     const router = new Router();
-
 //    router.get("/", passport.authenticate('jwt', { session: false}), (req, res) => {
     router.get("/list", this.authenticate(this.readRoles, this.model+' list'), (req, res) => {
+      var authData = this.authData;
         if (this.getToken(req.headers)) {
+          console.log('authData:'+JSON.stringify(authData));
         this.list()
         .then(ok(res))
         .then(null, fail(res));
