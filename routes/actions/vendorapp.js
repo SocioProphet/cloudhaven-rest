@@ -24,7 +24,6 @@ const uiMethods = {
         body: `
         var dataModel = this;
         this._appGet('formData', function(data) {
-          debugger;
           dataModel.items = data;
         })`
       },
