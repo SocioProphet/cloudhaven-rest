@@ -22,8 +22,10 @@ const uiMethods = {
       initialize: {
         args:[],
         body: `
+        var dataModel = this;
         this._appGet('formData', function(data) {
-          this.items = data;
+          debugger;
+          dataModel.items = data;
         })`
       },
       submitForm: {
@@ -66,7 +68,8 @@ const uiConfig = {
                           contents: [
                             {
                               component: 'textField',
-                              vmodel: 'formData.$t_textField1',
+                              vmodel: 'formData.textField1',
+                              tokenId: 'teztField1',
                               props: {
                                 dense: true,
                                 outlined: false,
@@ -88,7 +91,8 @@ const uiConfig = {
                           contents: [
                             {
                               component: 'textField',
-                              vmodel: 'formData.$t_textField3',
+                              vmodel: 'formData.textField3',
+                              tokenId: 'teztField3',
                               props: {
                                 dense: true,
                                 outlined: false,
