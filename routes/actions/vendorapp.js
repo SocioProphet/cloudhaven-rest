@@ -12,9 +12,9 @@ const dataModel = {
 
       ],
       formData: {
-        $t_textField1: '',
+        textField1: '',
         textField2: '',
-        $t_textField3: '',
+        textField3: '',
         textField4: ''
       }
     };
@@ -22,14 +22,14 @@ const uiMethods = {
       initialize: {
         args:[],
         body: `
-        var dataModel = this;
-        this._appGet('formData', function(data) {
-          dataModel.items = data;
+        this._appGet('formData', function(ui, data) {
+          ui.items = data;
+          ui.getUserData();
         })`
       },
       submitForm: {
         args:[],
-        body: `debugger; this._appPost('submitform', this.formData, function(data) { alert('result: '+data.success);});`
+        body: `debugger; this._appPost('submitform', this.formData, function(ui, data) { alert('result: '+data.success);});`
       },
     };
 
@@ -68,7 +68,7 @@ const uiConfig = {
                             {
                               component: 'textField',
                               vmodel: 'formData.textField1',
-                              tokenId: 'teztField1',
+                              tokenId: 'textField1',
                               props: {
                                 dense: true,
                                 outlined: false,
@@ -91,7 +91,7 @@ const uiConfig = {
                             {
                               component: 'textField',
                               vmodel: 'formData.textField3',
-                              tokenId: 'teztField3',
+                              tokenId: 'textField3',
                               props: {
                                 dense: true,
                                 outlined: false,
