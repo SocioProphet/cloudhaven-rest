@@ -1,10 +1,10 @@
 import BaseAction from './baseaction'
 import {fail} from "../../js/utils"
 import Vendor from '../../models/vendor'
-import User from '../../models/user'
 import Roles from '../../models/workflowroles'
 import mongoose from 'mongoose'
 import fileUpload from 'express-fileupload'
+import axios from 'axios'
 
 export class VendorAppMgr extends BaseAction{
   constructor(){
@@ -69,6 +69,26 @@ export class VendorAppMgr extends BaseAction{
       }
     });
 
+    this.router.post("/apppost", (req, res) => {
+//      if (this.getToken(req.headers)) {
+      var app = req.body.app;
+      if (req.body.httpMethod=='GET') {
+        axios.get(app.url+'/'+req.body.postId)
+        .then((response)=>{
+          res.json(response.data);
+        })
+      } else if (req.body.httpMethod=='POST') {
+        axios.post(app.url+'/'+req.body.postId, req.body.postData)
+        .then((response)=>{
+          res.json(response);
+        })
+      }
+
+/*      } else {
+        res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }*/
+    });
+      
     return this.router;
   }
 }

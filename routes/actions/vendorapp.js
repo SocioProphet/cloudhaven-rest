@@ -150,7 +150,7 @@ export default class VendorApp {
       this.router = new Router();
   }
   route(){
-    this.router.get("/", (req, res) => {
+    this.router.get("/initUIConfig", (req, res) => {
       res.json(uiConfig)
     });
     this.router.get("/formData", (req, res) => {
