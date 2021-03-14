@@ -1,7 +1,6 @@
 
 
 const dataModel = {
-      cardTitle: 'CloudHaven Example App',
       headers: [
         { text: 'First Name', value:'firstName', sortable: true },
         { text: 'Last Name', value:'lastName', sortable: true },
@@ -36,6 +35,7 @@ const uiMethods = {
     };
 
 const uiConfig = {
+      requiredUserData: ['textField1', 'textField3'],
       dataModel:dataModel,
       uiMethods: uiMethods,
       uiSchema: {
@@ -49,7 +49,7 @@ const uiConfig = {
             contents: [{
               component: 'cardTitle',
 //              contents: 'This is the title'
-              template: '<span>{{cardTitle}}</span>'
+              template: '<span>Sample App: {{ch_userData.textField1}}</span>'
             },
             {
               component: 'cardBody',
