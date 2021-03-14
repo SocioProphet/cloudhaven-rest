@@ -80,7 +80,7 @@ export class VendorAppMgr extends BaseAction{
       } else if (req.body.httpMethod=='POST') {
         axios.post(app.url+'/'+req.body.postId, req.body.postData)
         .then((response)=>{
-          res.json(response);
+          res.json(response.data);
         })
       }
 

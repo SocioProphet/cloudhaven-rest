@@ -24,6 +24,8 @@ const uiMethods = {
         body: `
         this._appGet('formData', function(ui, data) {
           ui.items = data;
+          ui.formData.textField2 = '2222222222222';
+          ui.formData.textField4 = '4444444444444';
           ui.getUserData();
         })`
       },
