@@ -56,7 +56,49 @@ export class ConversationMgr extends BaseAction{
 /*      } else {
         res.status(403).send({success: false, msg: 'Unauthorized.'});
       }*/
-          });
-          return this.router;
+      });
+
+    //this.authenticate(Roles.ANY, 'Add Comment'), 
+    // {contentId:'', content: ''}
+    this.router.post("/updatecomment", (req, res) => {
+      //      if (this.getToken(req.headers)) {
+        var varUserDataId = mongoose.Types.ObjectId(req.body.contentId);
+
+        VariableUserData.findOneAndUpdate({_id:varUserDataId}, {content: req.body.content}, {new: true} )
+        .then((varUserData)=>{
+          res.json({success:true, content:varUserData})
+        })
+        .then(null, fail(res));
+      /*      } else {
+              res.status(403).send({success: false, msg: 'Unauthorized.'});
+            }*/
+    });
+      
+            //this.authenticate(this.roles), 
+      this.router.delete("/comment/:conversationId/:commentId/:contentId", (req, res) => {
+//        if (this.getToken(req.headers)) {
+          var conversationId = mongoose.Types.ObjectId(req.params.conversationId);
+          var commentId = mongoose.Types.ObjectId(req.params.commentId);
+          var varUserDataId = mongoose.Types.ObjectId(req.params.contentId);
+
+          Conversation.findOneAndUpdate( {_id: conversationId}, {$pull:{comments:{_id:commentId}}}, {new: true} )
+          .then(conversation=>{
+            return VariableUserData.deleteOne({_id: varUserDataId})
+          })
+          .then(results=>{
+            if (results && results.n>0) {
+              res.json({success:true});
+            }
+          })
+          .catch(error=>{
+            res.json({success:false, errMsg:error+''});
+          })
+/*        } else {
+          res.status(403).send({success: false, msg: 'Unauthorized.'});
+        }*/
+      });
+  
+  
+      return this.router;
   }
 }
