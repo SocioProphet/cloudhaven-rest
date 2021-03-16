@@ -13,21 +13,59 @@ export class ConversationMgr extends BaseAction{
 
   route() {
     //this.authenticate(Roles.ANY, 'Create Conversation'), 
-    // {userId:'', conversation:{topic:'', comment:{author:'', content: ''}}}
+    this.router.get("/:topic", (req, res) => {
+      //      if (this.getToken(req.headers)) {
+        var topic = req.params.topic;
+
+        Conversation.findOne({topic:req.params.topic})
+        .populate('owner')
+        .populate({path:'comments', populate: {path: 'owner'}})
+        .then((conversation)=>{
+          res.json(conversation)
+        })
+        .then(null, fail(res));
+      /*      } else {
+              res.status(403).send({success: false, msg: 'Unauthorized.'});
+            }*/
+    });
+
+    //this.authenticate(Roles.ANY, 'Create Conversation'), 
+    this.router.get("/list", (req, res) => {
+      //      if (this.getToken(req.headers)) {
+        var userId = mongoose.Types.ObjectId(req.body.userId);
+
+        Conversation.find({})
+        .populate('owner')
+        .populate({path:'comments', populate: {path: 'owner'}})
+        .then((conversations)=>{
+          res.json(conversations)
+        })
+        .then(null, fail(res));
+      /*      } else {
+              res.status(403).send({success: false, msg: 'Unauthorized.'});
+            }*/
+    });
+
+    //this.authenticate(Roles.ANY, 'Create Conversation'), 
+    // {userId:'', topic: '', content: ''}
     this.router.post("/create", (req, res) => {
 //      if (this.getToken(req.headers)) {
         var userId = mongoose.Types.ObjectId(req.body.userId);
 
-        VariableUserData.create({owner:userId, content: req.body.conversation.comment.content})
-        .then(data=>{
-          return Conversation.create({
+        VariableUserData.create({
+          owner:userId, 
+          content: req.body.content})
+        .then(comment=>{
+          return Conversation.findOneAndUpdate({topic:req.body.topic}, { $set: {
             owner: userId,
-            topic: req.body.conversation.topic,
-            comments:[{author: userId, content: data._id}]
-          })
+            topic: req.body.topic,
+            comments:[comment]
+          }}, {upsert: true, new: true})
+          .populate('owner')
+          .populate({path:'comments', populate: {path: 'owner'}})
         })
         .then((conversation)=>{
-          res.json({success:true, conversaton:conversation})
+          res.json({success:true, conversation:conversation})
         })
         .then(null, fail(res));
 /*      } else {
@@ -40,17 +78,18 @@ export class ConversationMgr extends BaseAction{
     this.router.post("/addcomment", (req, res) => {
 //      if (this.getToken(req.headers)) {
         var authorId = mongoose.Types.ObjectId(req.body.authorId);
-
+        var newComment = null;
         VariableUserData.create({owner:authorId, content: req.body.content})
-        .then(data=>{
+        .then(comment=>{
+          newComment = comment;
           return Conversation.findOneAndUpdate(
             {_id:mongoose.Types.ObjectId(req.body.conversationId)},
-            {$push:{comments:{author: authorId, content: data._id}}},
+            {$push:{comments:comment}},
             {new:true}
           )
         })
         .then((conversation)=>{
-          res.json({success:true, conversaton:conversation})
+          res.json(newComment)
         })
         .then(null, fail(res));
 /*      } else {
@@ -64,7 +103,8 @@ export class ConversationMgr extends BaseAction{
       //      if (this.getToken(req.headers)) {
         var varUserDataId = mongoose.Types.ObjectId(req.body.contentId);
 
-        VariableUserData.findOneAndUpdate({_id:varUserDataId}, {content: req.body.content}, {new: true} )
+        VariableUserData.findOneAndUpdate({_id:varUserDataId}, 
+          {$set:{content: req.body.content, modified_at: new Date()}}, {new: true} )
         .then((varUserData)=>{
           res.json({success:true, content:varUserData})
         })
@@ -75,15 +115,14 @@ export class ConversationMgr extends BaseAction{
     });
       
             //this.authenticate(this.roles), 
-      this.router.delete("/comment/:conversationId/:commentId/:contentId", (req, res) => {
+      this.router.delete("/comment/:conversationId/:commentId", (req, res) => {
 //        if (this.getToken(req.headers)) {
           var conversationId = mongoose.Types.ObjectId(req.params.conversationId);
           var commentId = mongoose.Types.ObjectId(req.params.commentId);
-          var varUserDataId = mongoose.Types.ObjectId(req.params.contentId);
 
           Conversation.findOneAndUpdate( {_id: conversationId}, {$pull:{comments:{_id:commentId}}}, {new: true} )
           .then(conversation=>{
-            return VariableUserData.deleteOne({_id: varUserDataId})
+            return VariableUserData.deleteOne({_id: commentId})
           })
           .then(results=>{
             if (results && results.n>0) {

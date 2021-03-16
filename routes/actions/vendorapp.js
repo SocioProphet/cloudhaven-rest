@@ -140,6 +140,12 @@ const uiConfig = {
               headers: "this.headers",
               items: "this.items"
             }
+          },
+          {
+            component: 'conversation',
+            attrs: {
+              topic: 'Test Topic'
+            }
           }
         ]
       }
