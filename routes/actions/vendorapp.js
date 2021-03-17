@@ -15,7 +15,9 @@ const dataModel = {
         textField2: '',
         textField3: '',
         textField4: ''
-      }
+      },
+      tab: 1,
+      tabItems: ['tab1', 'tab2', 'tab3']
     };
 const uiMethods = {
       initialize: {
@@ -135,11 +137,55 @@ const uiConfig = {
             }]
           },
           {
-            component: 'dataTable',
-            attrs: {
-              headers: "this.headers",
-              items: "this.items"
-            }
+            component: 'tabs',
+            props: {
+              'align-with-title': true
+            },
+            vmodel: "tab",
+            contents: [
+              {
+                component: 'tabsSlider',
+                props:{ color: "yellow"}
+              },
+              {
+                component: 'tab',
+                template: '<span>{{tabItems[0]}}</span>'
+              },
+              {
+                component: 'tab',
+                template: '<span>{{tabItems[1]}}</span>'
+              },
+              {
+                component: 'tab',
+                template: '<span>{{tabItems[2]}}</span>'
+              }
+            ]
+          },
+          {
+            component: 'tabsItems',
+            vmodel: "tab",
+            contents: [
+              {
+                component: 'tabItem',
+                contents: [
+                  {
+                    component: 'dataTable',
+                    attrs: {
+                      headers: "this.headers",
+                      items: "this.items"
+                    }
+                  }        
+                ]
+              },
+              {
+                component: 'tabItem',
+                contents: 'Contents of Tab 2'
+              },
+              {
+                component: 'tabItem',
+                contents: 'Contents of Tab 3'
+              }
+            ]
           },
           {
             component: 'conversation',
