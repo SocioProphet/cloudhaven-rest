@@ -35,9 +35,29 @@ const uiMethods = {
         body: `this._appPost('submitform', this.formData, function(ui, data) { alert('result: '+data.success);});`
       },
     };
+const components = {
+  TableRow: {
+    component: 'tr',
+    contents: [
+      {
+        component: 'td',
+        template: '<span>{{scopedProps.firstName}}</span>'
+      },
+      {
+        component: 'td',
+        template: '<span>{{scopedProps.lastName}}</span>'
+      },
+      {
+        component: 'td',
+        template: '<span>{{scopedProps.address}}</span>'
+      }
+    ]
+  }
+}
 
 const uiConfig = {
       requiredUserData: ['textField1', 'textField3'],
+      components: components,
       dataModel:dataModel,
       uiMethods: uiMethods,
       uiSchema: {
@@ -171,6 +191,7 @@ const uiConfig = {
                   {
                     component: 'dataTable',
                     attrs: {
+                      uiSchema: components.TableRow,
                       headers: "this.headers",
                       items: "this.items"
                     }
