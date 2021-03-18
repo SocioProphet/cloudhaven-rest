@@ -1,6 +1,7 @@
 import BaseAction from './baseaction'
 import Roles from '../../models/workflowroles'
 import UserData from '../../models/userdata';
+import VariableUserData from '../../models/variableuserdata';
 import {fail} from "../../js/utils"
 import mongoose, { Mongoose } from 'mongoose';
 
@@ -42,6 +43,20 @@ export class UserDataMgr extends BaseAction{
         UserData.find(filter)
         .then((userDataList)=>{
           res.json(userDataList)
+        })
+/*      } else {
+        res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }*/
+    });
+
+    //this.authenticate([this.roles], 'UserData get'),
+    //{userId:'', names:['name1', ...]} 
+    this.router.get("/getbulkdata/:userId", (req, res) => {
+//      if (this.getToken(req.headers)) {
+        var userId = mongoose.Types.ObjectId(req.params.userId);
+        VariableUserData.find({owner:userId})
+        .then(( list )=>{
+          res.json(list)
         })
 /*      } else {
         res.status(403).send({success: false, msg: 'Unauthorized.'});

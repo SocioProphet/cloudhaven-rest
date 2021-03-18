@@ -17,7 +17,14 @@ const dataModel = {
         textField4: ''
       },
       tab: 0,
-      tabItems: ['tab1', 'tab2', 'tab3']
+      tabItems: ['tab1', 'tab2', 'tab3'],
+      dialog: false,
+      row: {
+        firstName: '',
+        lastName: '',
+        address: ''
+      },
+      formValid: true
     };
 const uiMethods = {
       initialize: {
@@ -32,10 +39,29 @@ const uiMethods = {
       },
       submitForm: {
         args:[],
-        body: `this._appPost('submitform', this.formData, function(ui, data) {
+        body: `
+        debugger;
+        if (!this.formValid) return;
+        this._appPost('submitform', this.formData, function(ui, data) {
           console.log(data.success);
         });`
       },
+      showDialog: {
+        args: ["row"],
+        body: `
+          var x = row;
+          this.row.firstName = row.firstName;
+          this.row.lastName = row.lastName;
+          this.row.address = row.address
+          this.dialog = true;
+        `
+      },
+      required: {
+        args: ["v"],
+        body: `
+        return !!v || "Required."
+        `
+      }
     };
 const components = {
   TableRow: {
@@ -80,6 +106,7 @@ const uiConfig = {
           contents: [
             {
               component: 'form',
+              vmodel: "formValid",
               props: {
                 'lazy-validation': true
               },
@@ -96,16 +123,18 @@ const uiConfig = {
                           vmodel: 'formData.firstName',
                           tokenId: 'firstName',
                           props: {
-                            dense: true,
                             outlined: false,
                             label: 'First Name'
-                          }},
-                          {
+                          },
+                          attrs: {
+                            rules: ["required"]
+                          }
+                        },
+                        {
                           component: 'textField',
                           vmodel: 'formData.lastName',
                           tokenId: 'lastName',
                           props: {
-                            dense: true,
                             outlined: false,
                             label: 'Last Name'
                           }}
@@ -119,7 +148,6 @@ const uiConfig = {
                           component: 'textField',
                           vmodel: 'formData.textField3',
                           props: {
-                            dense: true,
                             outlined: false,
                             label: 'Field 3'
                           }},
@@ -127,7 +155,6 @@ const uiConfig = {
                           component: 'textField',
                           vmodel: 'formData.textField4',
                           props: {
-                            dense: true,
                             outlined: false,
                             label: 'Field 4'
                           }}
@@ -156,7 +183,8 @@ const uiConfig = {
             contents: 'Save'
           }
           ]
-        }]
+        }
+        ]
       },
       {
         component: 'tabs',
@@ -192,6 +220,9 @@ const uiConfig = {
             contents: [
               {
                 component: 'dataTable',
+                on: {
+                  rowclicked: "this.showDialog"
+                },
                 attrs: {
                   uiSchema: components.TableRow,
                   headers: "this.headers",
@@ -209,6 +240,82 @@ const uiConfig = {
             contents: 'Contents of Tab 3'
           }
         ]
+      },
+      {
+        component: 'dialog',
+        props: {
+          "max-width":"500px"
+        },
+        vmodel: "dialog",
+        defaultSlot: {
+          component: 'form',
+          props: {
+            light: "true"
+          },
+          style: {
+            "background-color": "white"
+          },
+          contents: [
+            {
+              component: "cards",
+              contents: [
+                { component: "cardTitle", contents:"Edit Row"},
+                {
+                  component: "cardBody",
+                  contents: [
+                    {
+                      component: 'textField',
+                      vmodel: 'row.firstName',
+                      props: {
+                        dense: true,
+                        outlined: false,
+                        label: 'First Name'
+                      }
+                    },
+                    {
+                      component: 'textField',
+                      vmodel: 'row.lastName',
+                      props: {
+                        dense: true,
+                        outlined: false,
+                        label: 'Last Name'
+                      }
+                    },
+                    {
+                      component: 'textField',
+                      vmodel: 'row.address',
+                      tokenId: 'address',
+                      props: {
+                        dense: true,
+                        outlined: false,
+                        label: 'Last Name'
+                      }
+                    }
+                  ]
+                },
+                {
+                  component: 'cardActions',
+                  contents: [{
+                    component: 'button',
+                    contents: 'Cancel'
+                  },
+                  {
+                    component: 'spacer'
+                  },
+                  {
+                    component: 'button',
+                    on: {
+                      click: 'this.submitForm'
+                    },
+                    contents: 'Save'
+                  }
+                  ]
+                }
+        
+              ]
+            }
+          ]
+        }
       },
       {
         component: 'conversation',
