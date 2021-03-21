@@ -63,6 +63,15 @@ const uiMethods = {
         `
       }
     };
+const computed = {
+  testval: {
+    args:[],
+    body: `
+    debugger;
+    return 'test worked!';
+    `
+  }
+}
 const components = {
   TableRow: {
     component: 'tr',
@@ -88,6 +97,27 @@ const uiConfig = {
   requiredUserData: ['firstName', 'lastName'],
   dataModel:dataModel,
   uiMethods: uiMethods,
+  computed: computed,
+  appFrame: {
+    name: 'Surgical Recovery Suites',
+    appBarStyle: {background: 'linear-gradient(rgb(40, 54, 102) 0%, rgb(37, 114, 210) 100%)'},
+    appBarTextClass: "yellow--text text--accent-2",
+    nameTextClass: "white--text",
+    menuItems: [
+      { page: 'procedures', title: 'Procedures'},
+      { page: 'vendors', title: 'Vendors' },
+      { page: 'payers', title: 'Payers' },
+      { page: 'oscsetup', title: 'OSC Setup' },
+      { page: 'users', title: 'Users' },
+      { page: 'notificationTypes', title: 'Notification Types'},
+      { page: 'procedureTypes', title: 'Procedure Types'},
+      { page: 'cptCodes', title: 'CPT Codes'},
+      { page: 'icd10Codes', title: 'ICD10 Codes'},
+      { page: 'alerts', title: 'Case Alerts'},
+      { page: 'auditLog', title: 'Audit Log'},
+      { page: 'eventLog', title: 'Event Log'},
+    ]
+  },
   uiSchema: {
     component: 'container',
     contents: [
@@ -99,7 +129,7 @@ const uiConfig = {
         contents: [{
           component: 'cardTitle',
 //              contents: 'This is the title'
-          template: '<span>Welcome {{ch_userData.firstName}} {{ch_userData.lastName}}</span>'
+          template: '<span>Welcome {{ch_userData.firstName}} {{ch_userData.lastName}} [[{{testval}}]]</span>'
         },
         {
           component: 'cardBody',
