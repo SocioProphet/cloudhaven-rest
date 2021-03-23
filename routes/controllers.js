@@ -22,9 +22,7 @@ export class UserController extends BaseController{
     .populate({path:'vendor', select:{name:1}})
     .limit(MAX_RESULTS)
     .then((modelInstances) => {
-      var response = {};
-      response.records = modelInstances;
-      return response;
+      return modelInstances;
     });
   }
   update(id, updates) {
@@ -33,9 +31,7 @@ export class UserController extends BaseController{
       {$set:{ email:updates.email, name:updates.name, language:updates.language, roles:updates.roles}},
       {new:true})
       .then((user) => {
-        var response = {};
-        response.record = user;
-        return response;
+        return user;
       });
   }
   delete(id) {
@@ -63,9 +59,7 @@ export class VendorController extends BaseController{
     .find({})
     .limit(MAX_RESULTS)
     .then((modelInstances) => {
-      var response = {};
-      response.records = modelInstances;
-      return response;
+      return modelInstances;
     });
   }
 }

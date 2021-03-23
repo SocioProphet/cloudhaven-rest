@@ -91,9 +91,7 @@ export default class BaseController{
       .create(data)
       .then((modelInstance) => {
         this.logAuditData( modelInstance.id, 'create', data);
-        var response = {};
-        response.record = modelInstance;
-        return response;
+        return modelInstance;
       });
   }
 
@@ -104,9 +102,7 @@ export default class BaseController{
     .findOne(filter)
     .then((modelInstance) => {
       this.logAuditData( id, 'read', modelInstance);
-      var response = {};
-      response.record = modelInstance;
-      return response;
+      return modelInstance;
     });
   }
 
@@ -115,9 +111,7 @@ export default class BaseController{
       .find({})
       .limit(MAX_RESULTS)
       .then((modelInstances) => {
-        var response = {};
-        response.records = modelInstances;
-        return response;
+        return modelInstances;
       });
   }
 
@@ -146,9 +140,7 @@ export default class BaseController{
         return modelInstance.save();
       })
       .then((modelInstance) => {
-        var response = {};
-        response.record = modelInstance;
-        return response;
+        return modelInstance;
       })
   }
 

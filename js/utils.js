@@ -30,7 +30,7 @@ export function randomId( n ) {
 */
 export function ok(res){
   return (data) => {
-    res.json({data:data});
+    res.json(data);
   };
 };
 
