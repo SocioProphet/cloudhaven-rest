@@ -1,7 +1,8 @@
 import BaseAction from './baseaction'
 import Roles from '../../models/workflowroles'
-import User from '../../models/user';
+import User from '../../models/user'
 import {fail} from "../../js/utils"
+import _ from 'lodash'
 import mongoose from 'mongoose';
 
 export class UserInfo extends BaseAction{
@@ -33,6 +34,19 @@ export class UserInfo extends BaseAction{
         res.status(403).send({success: false, msg: 'Unauthorized.'});
       }
     });
+
+    //(search criteria) {email, ssn}
+    this.router.post("/lookup", this.authenticate([Roles.ANY], 'Lookup User'), (req, res) => {
+      if (this.getToken(req.headers)) {
+        User.findOne(req.body)
+        .then((user)=>{
+          res.json(_.pick(user,["_id", "email", "firstName", "middleName", "lastName"]))
+        })
+      } else {
+        res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }
+    });
+  
     return this.router;
   }
 }

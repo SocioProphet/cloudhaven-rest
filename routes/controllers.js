@@ -28,7 +28,7 @@ export class UserController extends BaseController{
   update(id, updates) {
     this.logAuditData( id, 'update', updates);
     return User.findOneAndUpdate({_id:id}, 
-      {$set:{ email:updates.email, name:updates.name, language:updates.language, roles:updates.roles}},
+      {$set:{ email:updates.email, firstName:updates.firstName, middleName:updates.middleName, lastName:updates.lastName, language:updates.language, roles:updates.roles}},
       {new:true})
       .then((user) => {
         return user;

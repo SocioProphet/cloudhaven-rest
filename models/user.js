@@ -17,7 +17,9 @@ var UserSchema = new Schema({
         type: String,
         required: true
   },
-  name: String,
+  firstName: { type: String, required: true},
+  middleName: { type: String, required: false},
+  lastName: { type: String, required: true},
   language: { type: String, required: true, enum: ['English', 'Spanish'], default:'English' },
   roles: [{type:String, enum: ['SYSADMIN', 'USER']}],
   vendor: { type:Schema.ObjectId, ref:'Vendor', required: false },
@@ -59,4 +61,9 @@ UserSchema.methods.comparePassword = function (passw, cb) {
     });
 };
 
+UserSchema.virtual('name').get(function () {
+    return this.firstName+' '+(this.middleName?(this.middleName+' '):'')+this.lastName;
+});
+UserSchema.set('toObject', { virtuals: true })
+UserSchema.set('toJSON', { virtuals: true })
 module.exports = mongoose.model('User', UserSchema);

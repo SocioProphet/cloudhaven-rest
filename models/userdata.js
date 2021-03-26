@@ -8,5 +8,5 @@ var UserDataSchema = new Schema({
     content: { type: String, required: true }
 });
 
-UserDataSchema.index({user:1, name: 1});
+UserDataSchema.index({user:1, lastName: 1, middleName:1, firstName:1});
 module.exports = mongoose.model('UserData', UserDataSchema);

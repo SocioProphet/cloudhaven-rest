@@ -30,11 +30,11 @@ const uiMethods = {
       initialize: {
         args:[],
         body: `
-        this._appGet('formData', function(ui, data) {
-          ui.items = data;
-          ui.formData.textField3 = '2222222222222';
-          ui.formData.textField4 = '4444444444444';
-          ui.getUserData();
+        this._appGet('formData', function(data) {
+          this.items = data;
+          this.formData.textField3 = '2222222222222';
+          this.formData.textField4 = '4444444444444';
+          this._getUserData();
         })`
       },
       submitForm: {
@@ -42,7 +42,7 @@ const uiMethods = {
         body: `
         debugger;
         if (!this.formValid) return;
-        this._appPost('submitform', this.formData, function(ui, data) {
+        this._appPost('submitform', this.formData, function(data) {
           console.log(data.success);
         });`
       },
