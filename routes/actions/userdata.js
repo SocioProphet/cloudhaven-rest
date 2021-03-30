@@ -35,14 +35,21 @@ export class UserDataMgr extends BaseAction{
     });
 
     //this.authenticate([this.roles], 'UserData get'),
-    //{userId:'', names:['name1', ...]} 
+    //{userIds:'', names:['name1', ...]} 
     this.router.post("/batchget", (req, res) => {
 //      if (this.getToken(req.headers)) {
-        var userId = mongoose.Types.ObjectId(req.body.userId);
-        var filter = req.body.tokenIds?{$or: req.body.tokenIds.map(name=>({user:userId, name:name}))}:{};
+        var userIds = req.body.userIds.map(id=>(mongoose.Types.ObjectId(id)));
+        var filter = {user:{$in:userIds}}
+        if (req.body.tokenIds && req.body.tokenIds.length>0) {
+          filter.name = {$in:req.body.tokenIds}
+        }
         UserData.find(filter)
         .then((userDataList)=>{
-          res.json(userDataList)
+          res.json(userDataList.reduce((mp,r)=>{
+            var list = mp[r.user] || (mp[r.user]=[]);
+            list.push(r);
+            return mp;
+          },{}))
         })
 /*      } else {
         res.status(403).send({success: false, msg: 'Unauthorized.'});

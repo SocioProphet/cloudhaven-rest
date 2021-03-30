@@ -128,7 +128,7 @@ if (useSSL) {
   app.listen(PORT);
 }
 
-User.find({})
+/*User.find({})
 .then((results)=>{
   if (results.length==0) {
     var newUser = new User({
@@ -152,5 +152,5 @@ User.find({})
       }
     });
   }
-})
+})*/
 
