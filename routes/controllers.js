@@ -4,6 +4,7 @@ import Vendor from '../models/vendor';
 import AuditLog from '../models/auditlog'
 import Roles from '../models/workflowroles'
 import mongoose from 'mongoose'
+import moment from 'moment'
 
 //import CaseWorkflowAssignment from '../models/caseworkflowassignment';
 
@@ -27,8 +28,12 @@ export class UserController extends BaseController{
   }
   update(id, updates) {
     this.logAuditData( id, 'update', updates);
+    var dateOfBirth = updates.dateOfBirth?moment(updates.dateOfBirth).toDate():null;
     return User.findOneAndUpdate({_id:id}, 
-      {$set:{ email:updates.email, firstName:updates.firstName, middleName:updates.middleName, lastName:updates.lastName, language:updates.language, roles:updates.roles}},
+      {$set:{ email:updates.email, 
+        firstName:updates.firstName, middleName:updates.middleName, lastName:updates.lastName, 
+        dateOfBirth: dateOfBirth, ssn: updates.ssn,
+        language:updates.language, roles:updates.roles}},
       {new:true})
       .then((user) => {
         return user;

@@ -20,6 +20,8 @@ var UserSchema = new Schema({
   firstName: { type: String, required: true},
   middleName: { type: String, required: false},
   lastName: { type: String, required: true},
+  dateOfBirth: Date,
+  ssn: String,
   language: { type: String, required: true, enum: ['English', 'Spanish'], default:'English' },
   roles: [{type:String, enum: ['SYSADMIN', 'USER']}],
   vendor: { type:Schema.ObjectId, ref:'Vendor', required: false },

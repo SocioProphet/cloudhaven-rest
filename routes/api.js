@@ -10,6 +10,7 @@ import { CalendarScheduling } from './actions/calendarscheduling.js';
 import { UserDataMgr } from './actions/userdata.js'
 import { ConversationMgr } from './actions/conversation.js'
 import { UserInfo } from './actions/userinfo.js'
+import { UserSearch } from './actions/usersearch.js'
 import { Reports } from './actions/reports.js'
 import { VendorContactMgr } from './actions/vendorcontact'
 import { UserSubscription } from './actions/usersubscription'
@@ -101,6 +102,7 @@ export default function() {
 
 //    router.use( '/vendorapp', new VendorApp().route());
     router.use( '/userinfo', new UserInfo().route());
+    router.use( '/usersearch', new UserSearch().route());
     router.use( '/userdata', new UserDataMgr().route());
     router.use( '/conversation', new ConversationMgr().route());
     router.use( '/reports', new Reports().route());
