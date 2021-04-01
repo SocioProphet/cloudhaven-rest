@@ -14,8 +14,7 @@ var UserSchema = new Schema({
         match: emailMatch
   },
   password: {
-        type: String,
-        required: true
+        type: String
   },
   firstName: { type: String, required: true},
   middleName: { type: String, required: false},
@@ -36,7 +35,7 @@ var UserSchema = new Schema({
 
 UserSchema.pre('save', function (next) {
     var user = this;
-    if (this.isModified('password') || this.isNew) {
+    if (user.password && (this.isModified('password') || this.isNew)) {
         bcrypt.genSalt(10, function (err, salt) {
             if (err) {
                 return next(err);

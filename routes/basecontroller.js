@@ -142,6 +142,9 @@ export default class BaseController{
       .then((modelInstance) => {
         return modelInstance;
       })
+      .catch(err=>{
+        console.log(err+'');
+      })
   }
 
   route(){

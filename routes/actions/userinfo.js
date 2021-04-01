@@ -24,11 +24,29 @@ export class UserInfo extends BaseAction{
       }
     });
 
-    this.router.get("/", this.authenticate([Roles.ANY], 'UserInfo get'), (req, res) => {
+    this.router.get("/:userId", this.authenticate([Roles.ANY], 'UserInfo get'), (req, res) => {
       if (this.getToken(req.headers)) {
-        this.getUserInfo(req.userId)
+        User.findById(req.params.userId)
         .then((user)=>{
           res.json(user)
+        })
+        .catch(err=>{
+          res.json(null);
+        })
+      } else {
+        res.status(403).send({success: false, msg: 'Unauthorized.'});
+      }
+    });
+
+    this.router.post("/getusers", this.authenticate([Roles.ANY], 'Get Users'), (req, res) => {
+      if (this.getToken(req.headers)) {
+        var userIds = req.body.userIds.map(id=>(mongoose.Types.ObjectId(id)));
+        User.find({_id:{$in:userIds}})
+        .then((users)=>{
+          res.json(users)
+        })
+        .catch(err=>{
+          res.json(null);
         })
       } else {
         res.status(403).send({success: false, msg: 'Unauthorized.'});

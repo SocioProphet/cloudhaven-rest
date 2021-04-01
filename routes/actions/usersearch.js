@@ -26,8 +26,8 @@ export class UserSearch extends BaseAction{
           searchCriteria.dateOfBirth = { $gte: lowBnd.toDate(), $lt: highBnd.toDate()};
         }
         User.find( searchCriteria )
-        .then((user)=>{
-          res.json(user);
+        .then((users)=>{
+          res.json(users);
         })
         .catch((err)=>{
           res.json({errMsg:"Can't find user.", success:false})
