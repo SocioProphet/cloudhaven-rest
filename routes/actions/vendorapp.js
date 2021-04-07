@@ -34,7 +34,7 @@ const uiMethods = {
           this.items = data;
           this.formData.textField3 = '2222222222222';
           this.formData.textField4 = '4444444444444';
-          this._getUserData();
+          this._getUserData(this.$store.state.user._id);
         })`
       },
       submitForm: {
@@ -43,6 +43,7 @@ const uiMethods = {
         debugger;
         if (!this.formValid) return;
         this._appPost('submitform', this.formData, function(data) {
+          this._gotoAppPage( 'formsubmitted' );
           console.log(data.success);
         });`
       },
@@ -99,24 +100,10 @@ const uiConfig = {
   uiMethods: uiMethods,
   computed: computed,
   appFrame: {
-    name: 'Surgical Recovery Suites',
+    name: 'Example App',
     appBarStyle: {background: 'linear-gradient(rgb(40, 54, 102) 0%, rgb(37, 114, 210) 100%)'},
     appBarTextClass: "yellow--text text--accent-2",
-    nameTextClass: "white--text",
-    menuItems: [
-      { page: 'procedures', title: 'Procedures'},
-      { page: 'vendors', title: 'Vendors' },
-      { page: 'payers', title: 'Payers' },
-      { page: 'oscsetup', title: 'OSC Setup' },
-      { page: 'users', title: 'Users' },
-      { page: 'notificationTypes', title: 'Notification Types'},
-      { page: 'procedureTypes', title: 'Procedure Types'},
-      { page: 'cptCodes', title: 'CPT Codes'},
-      { page: 'icd10Codes', title: 'ICD10 Codes'},
-      { page: 'alerts', title: 'Case Alerts'},
-      { page: 'auditLog', title: 'Audit Log'},
-      { page: 'eventLog', title: 'Event Log'},
-    ]
+    nameTextClass: "white--text"
   },
   uiSchema: {
     component: 'container',
@@ -129,7 +116,7 @@ const uiConfig = {
         contents: [{
           component: 'cardTitle',
 //              contents: 'This is the title'
-          template: '<span>Welcome {{ch_userData.firstName}} {{ch_userData.lastName}} [[{{testval}}]]</span>'
+          template: '<span>Welcome {{_userData.firstName}} {{_userData.lastName}}</span>'
         },
         {
           component: 'cardBody',
@@ -370,7 +357,7 @@ const uiConfig2 = {
         },
         contents: [{
           component: 'cardTitle',
-          template: '<span>Form submitted for {{ch_userData.firstName}} {{ch_userData.lastName}}</span>'
+          template: '<span>Form submitted for {{_userData.firstName}} {{_userData.lastName}}</span>'
         },
         {
           component: 'cardBody',
@@ -389,10 +376,10 @@ export default class VendorApp {
       this.router = new Router();
   }
   route(){
-    this.router.get("/initUIConfig", (req, res) => {
+    this.router.get("/apppages/home", (req, res) => {
       res.json(uiConfig)
     });
-    this.router.get("/formSubmitted", (req, res) => {
+    this.router.get("/apppages/formsubmitted", (req, res) => {
       res.json(uiConfig2)
     });
     this.router.get("/formData", (req, res) => {

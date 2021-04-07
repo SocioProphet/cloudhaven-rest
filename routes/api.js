@@ -6,7 +6,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from "../models/user";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
-//import VendorApp from './actions/vendorapp.js'
+import VendorApp from './actions/vendorapp.js'
 import { UserDataMgr } from './actions/userdata.js'
 import { ConversationMgr } from './actions/conversation.js'
 import { UserInfo } from './actions/userinfo.js'
@@ -100,7 +100,7 @@ export default function() {
     router.use( '/auditlog', new AuditLogReview().route());
     router.use( '/eventlog', new EventLogReview().route());
 
-//    router.use( '/vendorapp', new VendorApp().route());
+    router.use( '/vendorapp', new VendorApp().route());
     router.use( '/userinfo', new UserInfo().route());
     router.use( '/usersearch', new UserSearch().route());
     router.use( '/userdata', new UserDataMgr().route());
