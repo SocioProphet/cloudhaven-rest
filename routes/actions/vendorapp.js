@@ -1,5 +1,3 @@
-
-
 const dataModel = {
       headers: [
         { text: 'First Name', value:'firstName', sortable: true },
@@ -24,7 +22,12 @@ const dataModel = {
         lastName: '',
         address: ''
       },
-      formValid: true
+      formValid: true,
+      testList: [
+        {id:'1', text:'1111'},
+        {id:'2', text:'2222'}
+      ],
+      omit: false
     };
 const uiMethods = {
       initialize: {
@@ -62,7 +65,16 @@ const uiMethods = {
         body: `
         return !!v || "Required."
         `
-      }
+      }/*,
+      doTest: {
+        body: `
+        this.testList = [
+          {id:'3', text:'3333'},
+          {id:'4', text:'4444'}
+        ];
+        this.omit = !this.omit;
+        `
+      }*/
     };
 const computed = {
   testval: {
@@ -108,15 +120,21 @@ const uiConfig = {
   uiSchema: {
     component: 'container',
     contents: [
+/*      {
+        component:"loop", dataList:"testList", itemAlias:"item", indexIsKey:false, key:'id', 
+          content: {component: "template", template:"<span>{{item.text}}</span>"}
+      },
+      {component:"button", label:"Test", on:{click:"doTest"}},*/
       {
         component: 'card',
+        "omit":"omit",
         props: {
           elevation: 2
         },
         contents: [{
           component: 'cardTitle',
 //              contents: 'This is the title'
-          template: '<span>Welcome {{_userData.firstName}} {{_userData.lastName}}</span>'
+          template: '<span>Welcome {{ch_userData.firstName}} {{ch_userData.lastName}}</span>'
         },
         {
           component: 'cardBody',
@@ -242,8 +260,8 @@ const uiConfig = {
                 },
                 attrs: {
                   uiSchema: components.TableRow,
-                  headers: "this.headers",
-                  items: "this.items"
+                  ":headers": "headers",
+                  ":items": "items"
                 }
               }        
             ]
