@@ -122,7 +122,7 @@ const uiConfig = {
     contents: [
 /*      {
         component:"loop", dataList:"testList", itemAlias:"item", indexIsKey:false, key:'id', 
-          content: {component: "template", template:"<span>{{item.text}}</span>"}
+          contents: {component: "template", template:"<span>{{item.text}}</span>"}
       },
       {component:"button", label:"Test", on:{click:"doTest"}},*/
       {
