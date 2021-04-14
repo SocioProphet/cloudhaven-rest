@@ -40,8 +40,8 @@ export class UserDataMgr extends BaseAction{
 //      if (this.getToken(req.headers)) {
         var userIds = req.body.userIds.map(id=>(mongoose.Types.ObjectId(id)));
         var filter = {user:{$in:userIds}}
-        if (req.body.tokenIds && req.body.tokenIds.length>0) {
-          filter.name = {$in:req.body.tokenIds}
+        if (req.body.userDataIds && req.body.userDataIds.length>0) {
+          filter.name = {$in:req.body.userDataIds}
         }
         UserData.find(filter)
         .then((userDataList)=>{
