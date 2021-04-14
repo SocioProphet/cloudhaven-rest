@@ -243,37 +243,37 @@ const uiConfig = {
           {
             component: 'tab',
             template: '<span>{{tabItems[2]}}</span>'
-          }
-        ]
-      },
-      {
-        component: 'tabsItems',
-        vmodel: "tab",
-        contents: [
+          },
           {
-            component: 'tabItem',
+            component: 'tabsItems',
+            vmodel: "tab",
             contents: [
               {
-                component: 'dataTable',
-                on: {
-                  rowclicked: "this.showDialog"
-                },
-                attrs: {
-                  uiSchema: components.TableRow,
-                  ":headers": "headers",
-                  ":items": "items"
-                }
-              }        
+                component: 'tabItem',
+                contents: [
+                  {
+                    component: 'dataTable',
+                    on: {
+                      rowclicked: "this.showDialog"
+                    },
+                    attrs: {
+                      uiSchema: components.TableRow,
+                      ":headers": "headers",
+                      ":items": "items"
+                    }
+                  }        
+                ]
+              },
+              {
+                component: 'tabItem',
+                contents: 'Contents of Tab 2'
+              },
+              {
+                component: 'tabItem',
+                contents: 'Contents of Tab 3'
+              }
             ]
-          },
-          {
-            component: 'tabItem',
-            contents: 'Contents of Tab 2'
-          },
-          {
-            component: 'tabItem',
-            contents: 'Contents of Tab 3'
-          }
+          },    
         ]
       },
       {
