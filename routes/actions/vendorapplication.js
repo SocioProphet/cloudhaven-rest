@@ -30,7 +30,7 @@ export class VendorAppMgr extends BaseAction{
           }
           if (operation == 'add') {
             return Vendor.findOneAndUpdate(
-              { _id:mongoose.Types.ObjectId(req.body.vendorId), 
+              { _id:mongoose.Types.ObjectId(req.body.vendor_Id), 
                 applications:{$not:{$elemMatch:{'applications.name':application.name}}}}, 
               {$push:{applications:application}}, {new:true})
           } else {
@@ -38,7 +38,7 @@ export class VendorAppMgr extends BaseAction{
               mp['applications.$[elem].'+fld] = application[fld];
               return mp;
             },{});
-            return Vendor.findOneAndUpdate({_id:mongoose.Types.ObjectId(req.body.vendorId)},
+            return Vendor.findOneAndUpdate({_id:mongoose.Types.ObjectId(req.body.vendor_Id)},
               {$set:update}, {new:true, arrayFilters:[{'elem._id':mongoose.Types.ObjectId(req.body.applicationId)}]})
           }
         })()
@@ -69,6 +69,15 @@ export class VendorAppMgr extends BaseAction{
       }
     });
 
+    this.router.post("/getapppage", (req, res) => {
+      //      if (this.getToken(req.headers)) {
+      var app = req.body.app;
+      axios.get(app.url+'/'+req.body.page)
+      .then((response)=>{
+        res.json(response.data);
+      })
+  })
+      
     this.router.post("/apppost", (req, res) => {
 //      if (this.getToken(req.headers)) {
       var app = req.body.app;

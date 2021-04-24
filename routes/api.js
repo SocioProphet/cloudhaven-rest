@@ -14,6 +14,7 @@ import { Reports } from './actions/reports.js'
 import { VendorContactMgr } from './actions/vendorcontact'
 import { UserSubscription } from './actions/usersubscription'
 import { VendorAppMgr } from './actions/vendorapplication'
+import { VendorComponentMgr } from './actions/vendorcomponent'
 import { ChangePassword } from './actions/chgpwd'
 import cityStateLookup from '../services/citystatelookup'
 import { AuditLogReview } from './actions/auditlogreview'
@@ -107,6 +108,7 @@ export default function() {
     router.use( '/vendorcontact', new VendorContactMgr().route());
     router.use( '/usersubscription', new UserSubscription().route());
     router.use( '/vendorapplication', new VendorAppMgr().route());
+    router.use( '/vendorcomponent', new VendorComponentMgr().route());
     router.use( '/chgpwd', new ChangePassword().route());
     
     

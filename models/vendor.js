@@ -6,6 +6,8 @@ var contactSchema = Contact.schema;
 
 var vendorSchema = new Schema( {
     name: { type: String, required: true, unique:true },
+    vendorId: { type: String, required: true, unique: true},
+    componentsUrl: String,
     contacts: [ {
         name: { type: String, required: true },
         contactType: { type: String, enum: ['Technical', 'Billing', 'Administrative'], required: true },
@@ -18,6 +20,11 @@ var vendorSchema = new Schema( {
         mimeType: { type: String, required: false },
         logo: { type: Buffer, required: false },
         url: {type: String}
+    }],
+    components:[{
+        name: { type: String, required: true},
+        componentId: { type: String, required: true},
+        isApproved: {type: Boolean, default: true}
     }]
 }, {timestamps:true});
 
