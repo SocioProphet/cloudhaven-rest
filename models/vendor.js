@@ -16,6 +16,7 @@ var vendorSchema = new Schema( {
     } ],
     applications:[{
         name: { type: String, required: true},
+        applicationId: { type: String, required: true},
         isApproved: {type: Boolean, default: true},
         mimeType: { type: String, required: false },
         logo: { type: Buffer, required: false },

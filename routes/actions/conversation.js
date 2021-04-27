@@ -13,11 +13,13 @@ export class ConversationMgr extends BaseAction{
 
   route() {
     //this.authenticate(Roles.ANY, 'Create Conversation'), 
-    this.router.get("/:topic", (req, res) => {
+    this.router.post("/", (req, res) => {
       //      if (this.getToken(req.headers)) {
-        var topic = req.params.topic;
-
-        Conversation.findOne({topic:req.params.topic})
+      Conversation.findOne({
+          vendor:mongoose.Types.ObjectId(req.body.application.vendorId),
+          applicationId: req.body.application.applicationId,
+          page: req.body.application.page,
+          topic: req.body.topic})
         .populate('owner')
         .populate({path:'comments', populate: {path: 'owner'}})
         .then((conversation)=>{
@@ -36,6 +38,7 @@ export class ConversationMgr extends BaseAction{
 
         Conversation.find({})
         .populate('owner')
+        .populate('vendor')
         .populate({path:'comments', populate: {path: 'owner'}})
         .then((conversations)=>{
           res.json(conversations)
@@ -56,8 +59,16 @@ export class ConversationMgr extends BaseAction{
           owner:userId, 
           content: req.body.content})
         .then(comment=>{
-          return Conversation.findOneAndUpdate({topic:req.body.topic}, { $set: {
+          return Conversation.findOneAndUpdate(
+            {vendor:mongoose.Types.ObjectId(req.body.application.vendorId),
+              applicationId: req.body.application.applicationId,
+              page: req.body.application.page,
+              topic: req.body.topic},
+            { $set: {
             owner: userId,
+            vendorId: req.body.application.vendorId,
+            applicationId: req.body.application.applicationId,
+            page: req.body.application.page,
             topic: req.body.topic,
             comments:[comment]
           }}, {upsert: true, new: true})

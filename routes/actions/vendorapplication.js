@@ -14,10 +14,10 @@ export class VendorAppMgr extends BaseAction{
   
   route() {
     this.router.use(fileUpload());
-    this.router.post("/", this.authenticate(this.roles), (req, res) => {
+    this.router.post("/upsert", this.authenticate(this.roles), (req, res) => {
       var operation = req.body.operation;
       if (this.getToken(req.headers)) {
-        var application = {name: req.body.name, url: req.body.url};
+        var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId};
         (()=>{
           var len = req.files?Object.keys(req.files).length:0;
           if (len==1) {
@@ -31,7 +31,7 @@ export class VendorAppMgr extends BaseAction{
           if (operation == 'add') {
             return Vendor.findOneAndUpdate(
               { _id:mongoose.Types.ObjectId(req.body.vendor_Id), 
-                applications:{$not:{$elemMatch:{'applications.name':application.name}}}}, 
+                applications:{$not:{$elemMatch:{'applications.applicationId':application.applicationId}}}}, 
               {$push:{applications:application}}, {new:true})
           } else {
             var update = Object.keys(application).reduce((mp,fld)=>{
@@ -39,7 +39,7 @@ export class VendorAppMgr extends BaseAction{
               return mp;
             },{});
             return Vendor.findOneAndUpdate({_id:mongoose.Types.ObjectId(req.body.vendor_Id)},
-              {$set:update}, {new:true, arrayFilters:[{'elem._id':mongoose.Types.ObjectId(req.body.applicationId)}]})
+              {$set:update}, {new:true, arrayFilters:[{'elem._id':mongoose.Types.ObjectId(req.body._id)}]})
           }
         })()
         .then(vendor=>{
@@ -72,7 +72,7 @@ export class VendorAppMgr extends BaseAction{
     this.router.post("/getapppage", (req, res) => {
       //      if (this.getToken(req.headers)) {
       var app = req.body.app;
-      axios.get(app.url+'/'+req.body.page)
+      axios.get(app.url+'/apppages/'+req.body.page)
       .then((response)=>{
         res.json(response.data);
       })
