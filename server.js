@@ -7,6 +7,8 @@ import logger from 'morgan';
 import mongoose from 'mongoose';
 import passport from 'passport';
 import config from './config/database';
+import cors from 'cors';
+
 
 import User from './models/user.js'
 
@@ -71,7 +73,9 @@ if (useSSL) {
 const app = express();
 
 //app.use(pdf);
-
+app.use(cors({
+  exposedHeaders: ['Content-Disposition'],
+}));
 //Serving the files on the dist folder
 app.use(express.static(DIST_DIR));
 

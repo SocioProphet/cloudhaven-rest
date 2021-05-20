@@ -6,6 +6,16 @@ import VariableUserData from '../../models/variableuserdata';
 import {fail} from "../../js/utils"
 import mongoose, { Mongoose } from 'mongoose';
 import fileUpload from 'express-fileupload'
+import mammoth from 'mammoth';
+
+function sendResponse( res, userFile, data) {
+  var filename = userFile.name+'-_-_-'+userFile.fileName;
+  res.writeHead(200, [
+    ['Content-Type', userFile.mimeType],
+    ["Content-Disposition", `attachment; filename='${filename}'`]
+  ]);
+  res.end(Buffer.from(data));  
+}
 
 export class UserDataMgr extends BaseAction{
   constructor(){
@@ -74,27 +84,46 @@ export class UserDataMgr extends BaseAction{
     });
 
       //this.authenticate([this.roles], 'UserData get'),
-    this.router.get("/userfile/body/:userId/:fileId", this.authenticate(this.roles), (req, res) => {
-      var self = this;
+    this.router.get("/userfile/getfile/:userId/:fileId", (req, res) => {
 //      if (this.getToken(req.headers)) {
         UserFile.findOne({user:mongoose.Types.ObjectId(req.params.userId), _id:mongoose.Types.ObjectId(req.params.fileId)},
-          {name:1, fileName:1, mimeType:1})
-        .then(userFiles=>{
-          res.json(list);
-        })
+          {name:1, fileName:1, mimeType:1, body:1})
+        .then(userFile=>{
+          var buffer = null;
+          if (userFile.mimeType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            mammoth.convertToHtml(userFile.body)
+            .then((result)=>{
+              sendResponse(res, userFile, result.value);
+            })
+          } else {
+            sendResponse(res, userFile, userFile.body)
+          }
+         })
         .then(null, fail(res));
 /*      } else {
         res.status(403).send({success: false, msg: 'Unauthorized.'});
       }*/
     });
 
-    this.router.get("/userfile/list/:userId", this.authenticate(this.roles), (req, res) => {
+      this.router.post("/userfile/doc2html", (req, res) => {
+        var keys = Object.keys(req.files);
+        var fileData = keys.length>0?req.files[keys[0]].data:null;
+        if (fileData) {
+          mammoth.convertToHtml(fileData)
+          .then((result)=>{
+            res.contentType('text/html');
+            res.send(result.value);
+          })
+        }
+      });
+  
+    //this.authenticate(this.roles), 
+    this.router.get("/userfile/list/:userId", (req, res) => {
       var self = this;
 //      if (this.getToken(req.headers)) {
-        UserFile.find(req.params.id)
-        .then(userFile=>{
-          res.contentType(userFile.mimeType)
-          res.send(userFile.body)
+        UserFile.find({user:mongoose.Types.ObjectId(req.params.userId)},{name:1, fileName:1, mimeType:1})
+        .then(userFiles=>{
+          res.json(userFiles);
         })
         .then(null, fail(res));
 /*      } else {
@@ -103,18 +132,21 @@ export class UserDataMgr extends BaseAction{
     });
 
     //this.authenticate(this.roles), 
-    this.router.post("/", (req, res) => {
+    this.router.post("/userfile", (req, res) => {
 //      if (this.getToken(req.headers)) {
         var userId = req.body.userId;
-        var op = req.body.op;
-        var keys = Object.keys(req.files);
-        var fileData = keys.length>0?req.files[keys[0]]:null;
+        var op = req.body.operation;
+        var fileData = null;
+        if (req.files) {
+          var keys = Object.keys(req.files);
+          var fileData = keys.length>0?req.files[keys[0]].data:null;
+        }
         var promise = null;
         if (op == 'add') {
           var userFile = { user: userId,
               name: req.body.name,
-              fileName: file.name,
-              mimeType: file.mimetype,
+              fileName: req.body.fileName,
+              mimeType: req.body.mimeType,
               body: fileData
           };
           promise = UserFile.create(userFile);
@@ -122,12 +154,14 @@ export class UserDataMgr extends BaseAction{
           var update = {$set:{
             name:req.body.name,
             fileName: req.body.fileName,
-            mimeType: req.body.mimeType
           }}
-          if (fileData) update.body = fileData;
+          if (fileData) {
+            update['$set'].mimeType = req.body.mimeType;
+            update['$set'].body = fileData;
+          }
           promise = UserFile.findOneAndUpdate({user:mongoose.Types.ObjectId(userId), _id:mongoose.Types.ObjectId(req.body.fileId)}, update);
         } else if (op == 'delete') {
-          promise = UserFile.deleteOne({user:mongoose.Types.ObjectId(userId), user_id:mongoose.Types.ObjectId(req.body.fileId)});
+          promise = UserFile.deleteOne({user:mongoose.Types.ObjectId(userId), _id:mongoose.Types.ObjectId(req.body.fileId)});
         }
         promise.then(result=>{
           res.json({success:true})

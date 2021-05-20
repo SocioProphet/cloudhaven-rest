@@ -5,6 +5,7 @@ import Roles from '../../models/workflowroles'
 import mongoose from 'mongoose'
 import fileUpload from 'express-fileupload'
 import axios from 'axios'
+import FormData from 'form-data';
 
 export class VendorAppMgr extends BaseAction{
   constructor(){
@@ -92,11 +93,58 @@ export class VendorAppMgr extends BaseAction{
           res.json(response.data);
         })
       }
-
-/*      } else {
-        res.status(403).send({success: false, msg: 'Unauthorized.'});
-      }*/
     });
+
+    this.router.post("/appmultipartpost", (req, res) => {
+//      if (this.getToken(req.headers)) {
+        var formData = new FormData();
+        Object.keys(req.files).forEach(fileKey=>{
+          var fileName = (fileKey.indexOf('files.')==0)?fileKey.substring(6):fileKey;
+          var file = req.files[fileKey];
+          formData.append(fileKey, file.data);
+        })
+       Object.keys(req.body).forEach((key)=>{
+          if (key != '_appUrl' && key !='_postId' && key.indexOf('files.')!=0) {
+            formData.append(key, req.body[key]);
+          }
+        });
+        var appUrl = req.body._appUrl;
+        axios.post(appUrl+'/'+req.body._postId, formData, {headers: formData.getHeaders()})
+        .then((response)=>{
+          res.json(response.data);
+        })
+/*      } else {
+      res.status(403).send({success: false, msg: 'Unauthorized.'});
+    }*/
+    });
+
+    this.router.post('/appgetfile', (req, res) => {
+      var appUrl = req.body.appUrl;
+      var URL = `${appUrl}/${req.body.postId}/${req.body.fileId}`;
+      axios.get(URL, {responseType: 'arraybuffer', timeout: 30000 })
+      .then(response => {
+        if (!response) {
+          res.json(null);
+        } else {
+          var parts = response.headers["content-disposition"].split(/["']/);
+          const filename = parts[1];
+          const contentType = response.headers["content-type"];
+          var headers = [
+            ['Content-Type', contentType],
+            ["Content-Disposition", `filename='${filename}'`]
+          ];
+          res.writeHead(200, headers);
+          res.end(response.data);
+/*          res.set({
+            'Content-Disposition': `attachment; filename='${filename}'`,
+            'Content-Type': contentType
+          });
+          res.send(response.data);*/
+
+        }
+      })
+
+    })
       
     return this.router;
   }
