@@ -1,14 +1,17 @@
 import mongoose from 'mongoose';
-import scheduleItemSchema from 'scheduleitem';
+import ScheduleItem from './scheduleitem';
+import Sharing from './sharing';
 var Schema = mongoose.Schema;
+var scheduleItemSchema = ScheduleItem.schema;
+var sharingSchema = Sharing.schema;
 
 var MessageSchema = new Schema({
-    user: { type:Schema.ObjectId, ref:'User' },
-//    group: { type:Schema.Object, ref:'Group'},
-
+    sendingUser: {type: Schema.ObjectId, ref: 'User'},
+    sharings: [sharingSchema],
     subject: { type: String, required: true},
     message: { type: String, required: true },
-    organizationzation: { type: Schema.ObjectId, ref: 'Organization'},
+    date: { type: Date, default: new Date() },
+    organization: { type: Schema.ObjectId, ref: 'Organization'},
     applicationId: {type:String, default: ''},
     componentId: {type:String, default: ''},
     appConfigData: String, //any string value including stringified JSON

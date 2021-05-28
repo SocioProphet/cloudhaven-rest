@@ -47,7 +47,7 @@ export default class BaseController{
     }
 
     post( params, handler) {
-      this.router.post( params.path, this.authenticate(params), (req, res) => {
+      this.router.post( params.path, /*this.authenticate(params),*/ (req, res) => {
         if (this.getToken(req.headers)) {
           handler( req, res );
         } else {

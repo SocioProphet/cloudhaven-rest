@@ -2,20 +2,14 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcryptjs');
 
-var NONE = 'NONE';
-
 var emailMatch = [/^[^@]+@[^\.]+\..+$/, "Please fill a valid email address"];
 
+var FolderSchema = new Schema({
+});
+
 var UserSchema = new Schema({
-  email: {
-        type: String,
-        unique: true,
-        required: true,
-        match: emailMatch
-  },
-  password: {
-        type: String
-  },
+  email: {type: String, unique: true, required: true, match: emailMatch },
+  password: { type: String   },
   firstName: { type: String, required: true},
   middleName: { type: String, required: false},
   lastName: { type: String, required: true},
@@ -29,8 +23,7 @@ var UserSchema = new Schema({
     startDatetime: { type: Date, required: true, default: Date.now},
     organization: { type:Schema.ObjectId, ref:'Organization', required: true },
     application: { type: String, required: true }
-  }
-  ],
+  }]
 });
 
 UserSchema.pre('save', function (next) {
