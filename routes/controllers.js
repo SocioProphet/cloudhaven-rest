@@ -1,6 +1,6 @@
 import BaseController  from './basecontroller';
 import User from '../models/user'
-import Vendor from '../models/vendor';
+import Organization from '../models/organization';
 import AuditLog from '../models/auditlog'
 import Roles from '../models/workflowroles'
 import mongoose from 'mongoose'
@@ -20,7 +20,7 @@ export class UserController extends BaseController{
   list() {
     return this.model
     .find({})
-    .populate({path:'vendor', select:{name:1}})
+    .populate({path:'organization', select:{name:1}})
     .limit(MAX_RESULTS)
     .then((modelInstances) => {
       return modelInstances;
@@ -53,9 +53,9 @@ export class UserController extends BaseController{
   }
 }
 
-export class VendorController extends BaseController{
+export class OrganizationController extends BaseController{
   constructor(){
-    super(Vendor, '_id',
+    super(Organization, '_id',
       [Roles.SysAdmin],
       [Roles.SysAdmin]);
   }

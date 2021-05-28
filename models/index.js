@@ -2,7 +2,7 @@ console.log('Entering models/index.js...');
 var models = [
 'contact',
 'user',
-'vendor'
+'organization'
 ];
 for (var i=0;i<models.length;i++) {
     console.log('requiring '+models[i]);

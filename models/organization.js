@@ -4,9 +4,9 @@ var Schema = mongoose.Schema;
 
 var contactSchema = Contact.schema;
 
-var vendorSchema = new Schema( {
+var organizationSchema = new Schema( {
     name: { type: String, required: true, unique:true },
-    vendorId: { type: String, required: true, unique: true},
+    organizationId: { type: String, required: true, unique: true},
     componentsUrl: String,
     contacts: [ {
         name: { type: String, required: true },
@@ -26,7 +26,10 @@ var vendorSchema = new Schema( {
         name: { type: String, required: true},
         componentId: { type: String, required: true},
         isApproved: {type: Boolean, default: true}
+    }],
+    groups:[{
+        name: {type: String, required: true}
     }]
 }, {timestamps:true});
 
-export default mongoose.model( 'Vendor', vendorSchema );
+export default mongoose.model( 'Organization', organizationSchema );

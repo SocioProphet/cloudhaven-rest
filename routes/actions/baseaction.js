@@ -12,9 +12,20 @@ export default class BaseController{
     constructor() {
         this.router = new Router();
         this.authData = {};
+        this.roles = [];
     }
-  
+    setRoles() {
+      if (!arguments) {
+        var x = '';
+        
+      }
+      for (var i=0; i < arguments.length; i++) {
+        this.roles.push(arguments[i]);
+      }
+    }
+
     getToken(headers) {
+      return true; //FIXME - remove this line to re-enable roles
       if (headers && headers.authorization) {
         var parted = headers.authorization.split(' ');
         if (parted.length === 2) {
@@ -31,12 +42,45 @@ export default class BaseController{
       return (this.authData && this.authData.user) ? this.authData.user.name : '';
     }
 
-    authenticate(roles, sourceTag) {
-      var ad = this.authData;
-      var retVal = checkRoleWithPassport({authData:this.authData, user:this.authData.user, roles:roles}, passport, sourceTag );
-      var a = this.authData;
-      var x = '';
-      return retVal;
+    authenticate(params) {
+      return checkRoleWithPassport(this.authData, params.overrideRoles || this.roles, passport, params.tag );
+    }
+
+    post( params, handler) {
+      this.router.post( params.path, this.authenticate(params), (req, res) => {
+        if (this.getToken(req.headers)) {
+          handler( req, res );
+        } else {
+          res.status(403).send({success: false, msg: 'Unauthorized' + (params.tag?(` at(${params.tag})`):'')});
+        }
+      })
+    }
+    put( params, handler) {
+      this.router.put( params.path, this.authenticate(params), (req, res) => {
+        if (this.getToken(req.headers)) {
+          handler( req, res );
+        } else {
+          res.status(403).send({success: false, msg: 'Unauthorized' + (params.tag?(` at(${params.tag})`):'')});
+        }
+      })
+    }
+    get( params, handler) {
+      this.router.get( params.path, this.authenticate(params), (req, res) => {
+        if (this.getToken(req.headers)) {
+          handler( req, res );
+        } else {
+          res.status(403).send({success: false, msg: 'Unauthorized' + (params.tag?(` at(${params.tag})`):'')});
+        }
+      })
+    }
+    delete( params, handler) {
+      this.router.delete( params.path, this.authenticate(params), (req, res) => {
+        if (this.getToken(req.headers)) {
+          handler( req, res );
+        } else {
+          res.status(403).send({success: false, msg: 'Unauthorized' + (params.tag?(` at(${params.tag})`):'')});
+        }
+      })
     }
 
     logAuditData( model, recordId, operation, dataObj) {

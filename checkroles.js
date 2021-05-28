@@ -5,26 +5,26 @@ function hasRequiredRole( userRoles, requiredRoles) {
   },{});
   return requiredRoles.find((role)=>userRoleMap[role]);
 }
-export function checkRoleWithPassport(authData, passport, sourceTag ){
+export function checkRoleWithPassport(authData, roles, passport, sourceTag ){
     var func = function(req, res, next){
       passport.authenticate('jwt', function(err, user, info){
+        if (!info) info = {};
         if(err) { return next(err); }
           if(!user) {
             if (info.name === "TokenExpiredError") {
               return res.status(401).json({ message: "Your token has expired. Please generate a new one" });
           } else {
-              return res.status(401).json({ message: info.message });
+              return res.status(401).json({ message: (info.message + (sourceTag?(` at(${sourceTag})`):'')) });
           }
         }
-        if (authData && authData.authData) authData.authData.user = user;
+        if (authData) authData.user = user;
         req.userId = user._id;
-        if(!authData || !authData.roles || authData.roles.length == 0) {
+        if(!roles || roles.length == 0) {
             next()
-          } else if(authData.roles[0]=='ANY' || hasRequiredRole( user.roles, authData.roles)) {
+          } else if(roles[0]=='ANY' || hasRequiredRole( user.roles, roles)) {
             next()
           } else {
-            var st = sourceTag;
-            res.status(403).send('forbidden')
+            res.status(403).send('forbidden' + (sourceTag?(` at(${sourceTag})`):''))
           }
       })(req, res, next)
     }

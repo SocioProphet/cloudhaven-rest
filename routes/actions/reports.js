@@ -4,7 +4,7 @@ import Roles from '../../models/workflowroles'
 export class Reports extends BaseAction{
   constructor(){
     super();
-    this.roles = [Roles.SysAdmin];
+    this.setRoles(Roles.SysAdmin);
   }
 
   route() {

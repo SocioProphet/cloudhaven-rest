@@ -132,11 +132,13 @@ if (useSSL) {
   app.listen(PORT);
 }
 
-/*User.find({})
+User.find({})
 .then((results)=>{
   if (results.length==0) {
     var newUser = new User({
       email: 'richjvann@gmail.com',
+      firstName: 'Rich',
+      lastName: 'Vann',
       password: '22222',
       language: 'English',
       roles: ['SYSADMIN']
@@ -144,17 +146,11 @@ if (useSSL) {
     // save the user
     newUser.save(function(err) {
       if (err) {
-        if (err.name == 'ValidationError') {
-          res.json({success:false, errMsg: err.message})
-        } else if (err.name == 'MongoError' && err.code == 11000) {
-          res.json({success: false, msg: `User with email ${req.body.email} already exists.`});
-        } else {
-          res.json({success:false, errMsg: err.message})
-        }
+        console.log('Err:'+err);
       } else {
         console.log('Initial user (richjvann) created.');
       }
     });
   }
-})*/
+})
 

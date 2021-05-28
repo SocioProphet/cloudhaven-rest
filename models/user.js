@@ -23,11 +23,11 @@ var UserSchema = new Schema({
   ssn: String,
   language: { type: String, required: true, enum: ['English', 'Spanish'], default:'English' },
   roles: [{type:String, enum: ['SYSADMIN', 'USER']}],
-  vendor: { type:Schema.ObjectId, ref:'Vendor', required: false },
+  organization: { type:Schema.ObjectId, ref:'Organization', required: false },
   contactId: String,
   subscribedApps: [{
     startDatetime: { type: Date, required: true, default: Date.now},
-    vendor: { type:Schema.ObjectId, ref:'Vendor', required: true },
+    organization: { type:Schema.ObjectId, ref:'Organization', required: true },
     application: { type: String, required: true }
   }
   ],

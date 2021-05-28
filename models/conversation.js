@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 var ConversationSchema = new Schema({
   created_at: { type: Date, required: true, default: Date.now},
   owner: { type:Schema.ObjectId, ref:'User', required: true },
-  vendor: { type:Schema.ObjectId, ref:'Vendor' },
+  organization: { type:Schema.ObjectId, ref:'Organization' },
   applicationId: String,
   page: String,
   topic: { type: String, required: false},

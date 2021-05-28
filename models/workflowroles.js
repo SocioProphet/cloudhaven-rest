@@ -1,7 +1,7 @@
 export default {
     ANY: "ANY",
     SysAdmin: "SYSADMIN",
-	VendorAdmin: 'VENDORADMIN',
-    Vendor: "VENDOR",
+	OrganizationAdmin: 'ORGADMIN',
+    Organization: "ORGANIZATION",
 	User: "User"
 }

@@ -8,33 +8,29 @@ import mongoose from 'mongoose';
 export class UserSearch extends BaseAction{
   constructor(){
     super();
-    this.roles = [Roles.SysAdmin];
+    this.setRoles(Roles.SysAdmin);
   }
 
   route() {
-    this.router.post("/", this.authenticate(this.roles), (req, res) => {
-      if (this.getToken(req.headers)) {
-        var phrase = req.body.phrase;
-        var searchCriteria = {
-          $or: [{ firstName: { $regex: phrase, $options: 'i'} },
-            { lastName: { $regex: phrase, $options: 'i'} },
-            { ssn: { $regex: phrase, $options: 'i'} }]
-        }
-        if (req.body.dateOfBirth) {
-          var lowBnd = moment(req.body.dateOfBirth).startOf('day');
-          var highBnd = moment(lowBnd).add(1, 'days');
-          searchCriteria.dateOfBirth = { $gte: lowBnd.toDate(), $lt: highBnd.toDate()};
-        }
-        User.find( searchCriteria )
-        .then((users)=>{
-          res.json(users);
-        })
-        .catch((err)=>{
-          res.json({errMsg:"Can't find user.", success:false})
-        });
-      } else {
-        res.status(403).send({success: false, msg: 'Unauthorized.'});
+    this.post({path:"/"}, (req, res) => {
+      var phrase = req.body.phrase;
+      var searchCriteria = {
+        $or: [{ firstName: { $regex: phrase, $options: 'i'} },
+          { lastName: { $regex: phrase, $options: 'i'} },
+          { ssn: { $regex: phrase, $options: 'i'} }]
       }
+      if (req.body.dateOfBirth) {
+        var lowBnd = moment(req.body.dateOfBirth).startOf('day');
+        var highBnd = moment(lowBnd).add(1, 'days');
+        searchCriteria.dateOfBirth = { $gte: lowBnd.toDate(), $lt: highBnd.toDate()};
+      }
+      User.find( searchCriteria )
+      .then((users)=>{
+        res.json(users);
+      })
+      .catch((err)=>{
+        res.json({errMsg:"Can't find user.", success:false})
+      });
     });
   
     return this.router;

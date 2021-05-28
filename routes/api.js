@@ -7,23 +7,26 @@ import jwt from 'jsonwebtoken';
 import User from "../models/user";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
 import { UserDataMgr } from './actions/userdata.js'
+import { MessageMgr } from './actions/messagemgr.js'
 import { ConversationMgr } from './actions/conversation.js'
 import { UserInfo } from './actions/userinfo.js'
 import { UserSearch } from './actions/usersearch.js'
 import { Reports } from './actions/reports.js'
-import { VendorContactMgr } from './actions/vendorcontact'
+import { OrganizationContactMgr } from './actions/organizationcontact'
+import { OrganizationGroupMgr } from './actions/organizationgroup'
 import { UserSubscription } from './actions/usersubscription'
-import { VendorAppMgr } from './actions/vendorapplication'
-import { VendorComponentMgr } from './actions/vendorcomponent'
+import { OrganizationAppMgr } from './actions/organizationapplication'
+import { OrganizationComponentMgr } from './actions/organizationcomponent'
 import { ChangePassword } from './actions/chgpwd'
 import cityStateLookup from '../services/citystatelookup'
 import { AuditLogReview } from './actions/auditlogreview'
 import { EventLogReview } from './actions/eventlogreview'
+import userSrvc from '../services/user'
 
 
 
 
-import { UserController, VendorController } from './controllers';
+import { UserController, OrganizationController } from './controllers';
 
 
 export default function() {
@@ -70,7 +73,7 @@ export default function() {
     });
   
     router.post('/login', (req, res) => {
-      User.findOne({email: req.body.email}, {OSC:1, email:1, password:1, firstName:1, lastName:1, name:1, roles:1, vendor:1})
+      User.findOne({email: req.body.email}, {OSC:1, email:1, password:1, firstName:1, lastName:1, name:1, roles:1, organization:1})
       .then(user => {
         if (!user) {
           res.status(401).send({success: false, msg: 'Authentication failed. User not found.'});
@@ -82,6 +85,7 @@ export default function() {
               var token = jwt.sign(user.toJSON(), config.secret,  {expiresIn: '24h'} );
               // return the information including token as JSON
               res.json({success: true, token: 'JWT ' + token, user:user});
+              userSrvc.createUserMessageFolders( user._id );
             } else {
               res.status(401).send({success: false, msg: 'Authentication failed. Wrong password.'});
             }
@@ -94,7 +98,7 @@ export default function() {
     });
   
     router.use( '/users', new UserController().route());
-    router.use( '/vendors', new VendorController().route());
+    router.use( '/organizations', new OrganizationController().route());
   
     router.use( '/calendarscheduling', new CalendarScheduling().route());
     router.use( '/auditlog', new AuditLogReview().route());
@@ -103,12 +107,14 @@ export default function() {
     router.use( '/userinfo', new UserInfo().route());
     router.use( '/usersearch', new UserSearch().route());
     router.use( '/userdata', new UserDataMgr().route());
+    router.use( '/messagemgr', new MessageMgr().route());
     router.use( '/conversation', new ConversationMgr().route());
     router.use( '/reports', new Reports().route());
-    router.use( '/vendorcontact', new VendorContactMgr().route());
+    router.use( '/organizationcontact', new OrganizationContactMgr().route());
+    router.use( '/organizationgroup', new OrganizationGroupMgr().route());
     router.use( '/usersubscription', new UserSubscription().route());
-    router.use( '/vendorapplication', new VendorAppMgr().route());
-    router.use( '/vendorcomponent', new VendorComponentMgr().route());
+    router.use( '/organizationapplication', new OrganizationAppMgr().route());
+    router.use( '/organizationcomponent', new OrganizationComponentMgr().route());
     router.use( '/chgpwd', new ChangePassword().route());
     
     
