@@ -1,6 +1,7 @@
 import BaseAction from './baseaction'
 import Roles from '../../models/workflowroles'
 import User from '../../models/user'
+import UserSrvc from '../../services/user'
 import {fail} from "../../js/utils"
 import _ from 'lodash'
 import mongoose from 'mongoose';
@@ -31,6 +32,19 @@ export class UserSearch extends BaseAction{
       .catch((err)=>{
         res.json({errMsg:"Can't find user.", success:false})
       });
+    });
+
+    this.post({path:'/emailnamesearch'}, (req, res) =>{
+      if (!req.body.searchPhrase) {
+        res.json([]);
+      }
+      UserSrvc.userSearch( req.body.searchPhrase )
+      .then(users=>{
+        res.json(users)
+      })
+      .catch(()=>{
+        res.json([]);
+      })
     });
   
     return this.router;

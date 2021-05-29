@@ -1,5 +1,6 @@
 import mongoose, { Mongoose } from 'mongoose';
 import Folder from '../models/folder';
+import User from '../models/user';
 import _ from 'lodash'
 
 var obj = {};
@@ -33,5 +34,13 @@ obj.createUserMessageFolders = function( userId ) {
   })
   return promise;
 };
+obj.userSearch = function( searchPhrase ) {
+  var filter = {$or: [
+    { email: { '$regex': searchPhrase, '$options': 'i'}},
+    { firstName: { '$regex': searchPhrase, '$options': 'i'}},
+    { lastName: { '$regex': searchPhrase, '$options': 'i'}}
+]};
+  return User.find(filter, {email:1, firstName:1, middelName:1, lastName:1 });
+}
 
 export default obj;
