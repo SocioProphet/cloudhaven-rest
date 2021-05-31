@@ -10,10 +10,10 @@ obj.getUserFolderTree = function( userId ) {
     return Folder.find( {user:userId} );
 };
 
-obj.getFolderMsgs = function( userId, folderId, sentMessages ) {
+obj.getFolderMsgs = function( userId, folderId ) {
   if (_.isString(userId)) userId = mongoose.Types.ObjectId(userId);
   if (_.isString(folderId)) folderId = mongoose.Types.ObjectId(folderId);
-  return Message.find(sentMessages?{sendingUser:userId}:{sharings: {$elemMatch:{user:userId, folder:folderId}}})
+  return Message.find({sharings: {$elemMatch:{user:userId, folder:folderId}}})
     .populate({path: 'sharings.user', select:{name:1, firstName:1, middleName:1, lastName:1}})
 }
 
@@ -30,11 +30,13 @@ obj.userCreateMsg = function( senderId, recipients, folderName,  subject, messag
         userIds.push(u._id);
         return mp;
       },{});
-      return Folder.find({user:{$in:userIds}, name: folderName}, {user:1})
+      return Folder.find({user:{$in:userIds}, name: {$in:['Sent','Trash', folderName]}}, {user:1, name:1})
     })
     .then(folders=>{
+      var sentFolder = null;
       var userToFolderMap = folders.reduce((mp,f)=>{
-        mp[f.user] = f;
+        mp[f.name+'|'+f.user] = f;
+        if (f.name == 'Sent') sentFolder = f;
         return mp;
       },{})
       var sharings = recipients.map((r)=>{
@@ -42,9 +44,12 @@ obj.userCreateMsg = function( senderId, recipients, folderName,  subject, messag
         return {
           user: userId,
           recipientType: r.type,
-          folder: userToFolderMap[userId]
+          folder: userToFolderMap[folderName+'|'+userId]
         };
       });
+      if (sentFolder) {
+        sharings.push({user:senderId, recipientType:'sender', folder: sentFolder._id})
+      }
       return Message.create({
         sendingUser: senderId,
         sharings: sharings,
@@ -59,6 +64,42 @@ obj.userCreateMsg = function( senderId, recipients, folderName,  subject, messag
       resolve(null);
     })
   });
+  return promise;
+}
+obj.delete = function(msgId, folderId, userId) {
+  if (_.isString(msgId)) msgId = mongoose.Types.ObjectId(msgId);
+  if (_.isString(userId)) userId = mongoose.Types.ObjectId(userId);
+  if (_.isString(folderId)) folderId = mongoose.Types.ObjectId(folderId);
+  var trashFolder = null;
+  var deleteFolder = null;
+  var promise = new Promise(function( resolve, reject) {
+    Folder.find({user:userId, $or:[{name: 'Trash'}, {_id:folderId}]}, {user:1, name:1})
+    .then(folders =>{
+      deleteFolder = folders.find(f=>(f._id.toString() == folderId.toString()));
+      trashFolder = folders.find(f=>(f.name=='Trash'));
+      if (deleteFolder.name == 'Trash') {
+        return Message.findOneAndUpdate({_id: msgId, sharings:{$elemMatch:{user:userId, folder:trashFolder._id}}},
+          {$pull:{sharings:{user:userId, folder:folderId}}}, {new:true})
+      } else {
+        return Message.findOneAndUpdate({_id: msgId}, 
+          {$set:{'sharings.$[elem].folder':trashFolder._id}}, {arrayFilters: [{'elem.folder':deleteFolder._id}], new:true}) 
+      }
+    })
+    .then(newMsg=>{
+      if (newMsg && newMsg.sharings.length==0) {
+        Message.remove( {_id: msgId})
+        .then(result => {
+          resolve(true);
+        })
+      } else {
+        resolve(true);
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      resolve(false);
+    })
+  })
   return promise;
 }
 

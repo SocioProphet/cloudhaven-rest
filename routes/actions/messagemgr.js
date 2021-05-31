@@ -32,8 +32,8 @@ export class MessageMgr extends BaseAction {
       })
     });
 
-    this.get({path:"/getfoldermsgs/:folderId/:isSentFolder"}, (req, res) =>{
-      MessageSrvc.getFolderMsgs( this.authData.user._id, req.params.folderId, req.params.isSentFolder=='true' )
+    this.get({path:"/getfoldermsgs/:folderId"}, (req, res) =>{
+      MessageSrvc.getFolderMsgs( this.authData.user._id, req.params.folderId )
       .then(messages =>{
         res.json(messages || []);
       })
@@ -41,6 +41,12 @@ export class MessageMgr extends BaseAction {
         res.json({sucess:false, errMsg: 'Failed to create message'});
       })
     });
-    return this.router;
+    this.delete({path:'/userdeletemsg/:userId/:folderId/:msgId'}, (req, res) => {
+      MessageSrvc.delete(req.params.msgId, req.params.folderId, req.params.userId)
+      .then(result =>{
+        res.json({success:result});
+      })
+    })
+   return this.router;
   }
 }
