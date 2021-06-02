@@ -28,7 +28,7 @@ export class MessageMgr extends BaseAction {
         res.json({success: true, msg: newMsg});
       })
       .catch(err =>{
-        res.json({sucess:false, errMsg: 'Failed to create message'});
+        res.json({success:false, errMsg: 'Failed to create message'});
       })
     });
 
@@ -38,7 +38,7 @@ export class MessageMgr extends BaseAction {
         res.json(messages || []);
       })
       .catch(err =>{
-        res.json({sucess:false, errMsg: 'Failed to create message'});
+        res.json({success:false, errMsg: 'Failed to create message'});
       })
     });
     this.delete({path:'/userdeletemsg/:userId/:folderId/:msgId'}, (req, res) => {

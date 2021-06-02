@@ -8,6 +8,7 @@ import User from "../models/user";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
 import { UserDataMgr } from './actions/userdata.js'
 import { MessageMgr } from './actions/messagemgr.js'
+import { CalendarMgr } from './actions/calendarmgr.js'
 import { ConversationMgr } from './actions/conversation.js'
 import { UserInfo } from './actions/userinfo.js'
 import { UserSearch } from './actions/usersearch.js'
@@ -108,6 +109,7 @@ export default function() {
     router.use( '/usersearch', new UserSearch().route());
     router.use( '/userdata', new UserDataMgr().route());
     router.use( '/messagemgr', new MessageMgr().route());
+    router.use( '/calendarmgr', new CalendarMgr().route());
     router.use( '/conversation', new ConversationMgr().route());
     router.use( '/reports', new Reports().route());
     router.use( '/organizationcontact', new OrganizationContactMgr().route());

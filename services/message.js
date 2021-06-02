@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from 'mongoose';
+import mongoose from 'mongoose';
 import Folder from '../models/folder';
 import Message from '../models/message';
 import User from '../models/user'
