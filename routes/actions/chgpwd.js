@@ -36,7 +36,8 @@ export class ChangePassword extends BaseAction{
           if (err) {
             return res.json({success:false, errMsg:err});
           }
-          User.findOneAndUpdate({_id:req.body._id}, {$set:{password:hash}})
+          var filter = req.body._id?{_id:req.body._id}:{email:req.body.email};
+          User.findOneAndUpdate(filter, {$set:{password:hash}})
           .then(result=>{
             res.json({success:result?true:false})
           })

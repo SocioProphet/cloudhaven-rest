@@ -1,6 +1,5 @@
 console.log('Entering models/index.js...');
 var models = [
-'contact',
 'user',
 'organization'
 ];

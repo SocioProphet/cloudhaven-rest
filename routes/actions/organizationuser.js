@@ -5,14 +5,14 @@ import User from '../../models/user'
 import Roles from '../../models/workflowroles'
 import mongoose from 'mongoose'
 
-export class OrganizationContactMgr extends BaseAction{
+export class OrganizationUserMgr extends BaseAction{
   constructor(){
     super();
     this.setRoles(Roles.SysAdmin, Roles.OrganizationAdmin);
   }
   
   route() {
-    this.post({path:"/"}, (req, res) => {
+    this.get({path:"/"}, (req, res) => {
       var contact = req.body.organizationContact;
       if (this.getToken(req.headers)) {
         User.findOne({email:contact.hasLoginAccess?contact.contactInfo.email:'dummyemailvalue'})
@@ -30,7 +30,7 @@ export class OrganizationContactMgr extends BaseAction{
               } else {
                 if (contact.hasLoginAccess) {
                   var addedContact = organization.contacts.find(c=>(c.name==contact.name && c.contactInfo.email==contact.contactInfo.email));
-                  User.create({name:contact.name, email:contact.contactInfo.email, organization:organization.id, contactId:addedContact.id, password:(new Date().getTime()+''), roles:['ORGANIZATION']})
+                  User.create({name:contact.name, email:contact.contactInfo.email, organization:organization.id,  password:(new Date().getTime()+''), roles:['ORGANIZATION']})
                   .then(result=>{
                     res.json({success:true, contacts:organization.contacts});
                   })

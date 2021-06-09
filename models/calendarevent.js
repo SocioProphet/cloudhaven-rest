@@ -6,13 +6,13 @@ var sharingSchema = Sharing.schema;
 var CalendarEventSchema = new Schema({
     owner: {type: Schema.ObjectId, ref: 'User'},
     sharings: [sharingSchema],
-    type: { type: String, enum:['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference'], default: 'Event'},
+    type: { type: String, enum:['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Task', 'Birthday', 'Conference'], default: 'Event'},
     title: { type: String, required: true},
     content: { type: String, required: true },
     start: { type: Date, default: new Date() },
     end: { type: Date, default: new Date() },
     durationType: {type: String, enum:['allday', 'timed']},
-    organization: { type: Schema.ObjectId, ref: 'Organization'},
+    organization: { type: Schema.ObjectId, ref: 'Organization'}, //org of the app or component
     applicationId: {type:String, default: ''},
     componentId: {type:String, default: ''},
     appConfigData: String, //any string value including stringified JSON

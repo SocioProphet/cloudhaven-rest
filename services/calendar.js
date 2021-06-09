@@ -25,6 +25,33 @@ obj.userCreateEvent = function( ownerId, type, title, content, start, end, durat
   if (type) event.type = type;
   return CalendarEvent.create(event);
 }
+//{ownerId, ownerEmail, type, title, content, start, end, durationType, 
+// organizationId, applicationId, componentId, appConfigData, isDone, resultMessage}
+
+obj.appCreateEvent = function( params ) {
+  var promises = [];
+  if (!params.ownerId && params.ownerEmail) {
+    promises.push(User.findOne({email:params.ownerEmail}, {_id:1}));
+  }
+  return mongoose.Promise.all(promises)
+  .then(results=>{
+    var ownerId = params.ownerId || (results.length>0?results[0]._id:null);
+    var event = {
+      owner: ownerId,
+      title: params.title,
+      content: params.content || '',
+      start: params.start,
+      durationType: params.durationType
+    };
+    if (params.organizationId) event.organization = params.organizationId;
+    if (params.applicationId) event.applicationId = params.applicationId;
+    if (params.componentId) event.componentId = params.componentId;
+    if (params.appConfigData) event.appConfigData = JSON.stringify(params.appConfigData);
+    if (params.type) event.type = params.type;
+    return CalendarEvent.create(event);      
+  })
+
+}
 obj.userUpdateEvent = function( _id, type, title, content, start, end, durationType ) {
   var update = {$set:{
     title: title,

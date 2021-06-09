@@ -11,6 +11,8 @@ import cors from 'cors';
 
 
 import User from './models/user.js'
+import emailSender from './services/emailsender.js'
+console.log('emailSender:'+JSON.stringify(emailSender));
 
 //import pdf from 'express-pdf'
 //express-pdf uses html-pdf which has a critical vulnerability, however the way this application

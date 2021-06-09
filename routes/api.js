@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
+import moment from 'moment';
 import passport from 'passport';
 import config from '../config/database';
 import passportObj from '../config/passport'
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from "../models/user";
+import EmailVerifyCode from "../models/emailverifycode";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
 import { UserDataMgr } from './actions/userdata.js'
 import { MessageMgr } from './actions/messagemgr.js'
@@ -13,7 +15,7 @@ import { ConversationMgr } from './actions/conversation.js'
 import { UserInfo } from './actions/userinfo.js'
 import { UserSearch } from './actions/usersearch.js'
 import { Reports } from './actions/reports.js'
-import { OrganizationContactMgr } from './actions/organizationcontact'
+import { OrganizationUserMgr } from './actions/organizationuser'
 import { OrganizationGroupMgr } from './actions/organizationgroup'
 import { UserSubscription } from './actions/usersubscription'
 import { OrganizationAppMgr } from './actions/organizationapplication'
@@ -23,9 +25,19 @@ import cityStateLookup from '../services/citystatelookup'
 import { AuditLogReview } from './actions/auditlogreview'
 import { EventLogReview } from './actions/eventlogreview'
 import userSrvc from '../services/user'
+import emailSender from '../services/emailsender'
+var bcrypt = require('bcryptjs');
 
 
-
+const randString = () => {
+  const len = 12;
+  let randStr = '';
+  for (let i=0; i< len; i++) {
+    const ch = Math.floor((Math.random() * 10) + 1);
+    randStr += ch;
+  }
+  return randStr;
+}
 
 import { UserController, OrganizationController } from './controllers';
 
@@ -48,33 +60,153 @@ export default function() {
   });
   
     router.post('/signup', (req, res) => {
-      if (!req.body.email || !req.body.password) {
-        res.json({success: false, msg: 'Please supply both email and password.'});
-      } else {
-        var newUser = new User({
-          email: req.body.email,
-          password: req.body.password,
-          language: req.body.language,
-          roles: []
-        });
-        // save the user
-        newUser.save(function(err) {
-          if (err) {
-            if (err.name == 'ValidationError') {
-              res.json({success:false, errMsg: err.message})
-            } else if (err.name == 'MongoError' && err.code == 11000) {
-              res.json({success: false, msg: `User with email ${req.body.email} already exists.`});
-            } else {
-              res.json({success:false, errMsg: err.message})
-            }
+      User.create({
+        email: req.body.email,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        password: req.body.password,
+        roles: ['USER']
+      })
+      .then(newUser =>{
+        return EmailVerifyCode.create({
+          mode: 'email',
+          email: newUser.email,
+          code: randString()
+        });  
+      })
+      .then(newVCode =>{
+        emailSender.sendAccountVerificationEmail({email:newVCode.email, code: newVCode.code});
+        res.json({success: true, verificationEmail:newVCode.email});
+      })
+      .catch(err =>{
+          if (err.name == 'ValidationError') {
+            res.json({success:false, errMsg: err.message})
+          } else if (err.name == 'MongoError' && err.code == 11000) {
+            res.json({success: false, msg: `A user with email ${req.body.email} already exists - please use a different email.`});
+          } else {
+            res.json({success:false, errMsg: err.message})
           }
-          res.json({success: true, msg: 'Successful created new user.'});
-        });
-      }
+      });
     });
+
+    router.get('/isemailverifypending/:email', (req, res) => {
+      User.findOne({email:req.params.email})
+      .then(user => {
+        res.json({success: true, user:user});
+      })
+      .catch(err =>{
+        res.json({success:false});
+      })
+    });
+
+    router.get('/resendverificationemail/:email', (req, res) => {
+      EmailVerifyCode.deleteMany({email:req.params.email, mode:'email'})
+      .then(results => {
+        return EmailVerifyCode.create({
+          mode: 'email',
+          email: req.params.email,
+          code: randString()
+        })
+      })
+      .then(newVCode =>{
+        emailSender.sendAccountVerificationEmail({email:newVCode.email, code: newVCode.code});
+        res.json({success: true, verificationEmail:newVCode.email});
+      })
+    });
+
+    router.get('/verifyaccount/:email/:code', (req, res) => {
+      EmailVerifyCode.findOne({mode:'email', email:req.params.email, code: req.params.code})
+      .then( vCode => {
+        var promises = [];
+        if (vCode) {
+          promises.push(User.findOneAndUpdate({email:req.params.email, status:'Email Verification Pending'},
+          {$set:{status:'Need Organization Assignment'}}));
+        }
+        return mongoose.Promise.all(promises);
+      })
+      .then(result =>{
+        var badCodeHTML = `
+        <html>
+        <body>
+          <p>This account verification link is not valid (expires after 10 minutes).</p>
+        </body>
+      </html>`;
+        var redirectHTML = `
+        <html>
+        <head>
+          <meta http-equiv="refresh" content="0; URL=${process.env.CLIENT_DOMAIN}" />
+        </head>
+        <body>
+          <p>If you are not redirected in five seconds, <a href="${process.env.CLIENT_DOMAIN}">click here</a>.</p>
+        </body>
+      </html>`;
+
+      res.set('Content-Type', 'text/html');
+      res.send(result.length==1?redirectHTML:badCodeHTML)
+      })
+    })
   
+    router.get('/sendpwdresetemail/:email', (req, res) => {
+      EmailVerifyCode.deleteMany({email:req.params.email, mode:'password'})
+      .then(results => {
+        return EmailVerifyCode.create({
+          mode: 'password',
+          email: req.params.email,
+          code: randString()
+        })
+      })
+      .then(newVCode =>{
+        emailSender.sendPasswordResetEmail({email:newVCode.email, code: newVCode.code});
+        res.json({success: true, verificationEmail:newVCode.email});
+      })
+    });
+
+    router.get('/requestpwdreset/:email/:code', (req, res) => {
+      EmailVerifyCode.findOne({mode:'password', email:req.params.email, code: req.params.code})
+      .then( vCode => {
+        var badCodeHTML = `
+        <html>
+        <body>
+          <p>This password reset link is not valid (expires after 10 minutes).</p>
+        </body>
+      </html>`;
+
+      res.set('Content-Type', 'text/html');
+      res.send(vCode?emailSender.getPasswordResetForm(vCode.email, vCode.code):badCodeHTML);
+      })
+    })
+
+    router.post("/resetpwd", (req, res) => {
+      EmailVerifyCode.findOne({mode:'password', email:req.body.email, code: req.body.code})
+      .then( vCode => {
+        if (!vCode) {
+          res.json({success:false, errMsg:'Password reset email expired.'});
+        } else {
+          bcrypt.genSalt(10, function (err, salt) {
+            if (err) {
+                return res.json({success:false, errMsg:err});
+            }
+            bcrypt.hash(req.body.newPassword, salt, function (err, hash) {
+              if (err) {
+                return res.json({success:false, errMsg:err});
+              }
+              var filter = req.body._id?{_id:req.body._id}:{email:req.body.email};
+              User.findOneAndUpdate(filter, {$set:{password:hash}})
+              .then(result=>{
+                res.json({success:result?true:false})
+              })
+              .catch(err =>{
+                res.json({success:false, errMsg:err});
+              });
+            });
+          });
+        }
+      });  
+    });
+    
     router.post('/login', (req, res) => {
-      User.findOne({email: req.body.email}, {OSC:1, email:1, password:1, firstName:1, lastName:1, name:1, roles:1, organization:1})
+      User.findOne({email: req.body.email},
+        {email:1, password:1, status:1, firstName:1, lastName:1, name:1, roles:1, orgMemberships:1})
       .then(user => {
         if (!user) {
           res.status(401).send({success: false, msg: 'Authentication failed. User not found.'});
@@ -112,7 +244,7 @@ export default function() {
     router.use( '/calendarmgr', new CalendarMgr().route());
     router.use( '/conversation', new ConversationMgr().route());
     router.use( '/reports', new Reports().route());
-    router.use( '/organizationcontact', new OrganizationContactMgr().route());
+    router.use( '/organizationuser', new OrganizationUserMgr().route());
     router.use( '/organizationgroup', new OrganizationGroupMgr().route());
     router.use( '/usersubscription', new UserSubscription().route());
     router.use( '/organizationapplication', new OrganizationAppMgr().route());

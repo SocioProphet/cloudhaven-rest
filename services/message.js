@@ -17,11 +17,15 @@ obj.getFolderMsgs = function( userId, folderId ) {
     .populate({path: 'sharings.user', select:{name:1, firstName:1, middleName:1, lastName:1}})
 }
 
+//params: senderId, recipients, folderName, subject, message
 //recipients: [{type: 'to|cc|bcc', email: <email>}, ...]
-obj.userCreateMsg = function( senderId, recipients, folderName,  subject, message ) {
-  var promise = new Promise(function( resolve, reject){
+obj.userCreateMsg = function( params ) {
+  var promise = new Promise(function( resolve, reject) {
     var emailToUserMap = {};
-    var emails = recipients.map(r=>(r.email));
+    var emails = params.recipients.map(r=>(r.email));
+    if (!params.senderId && params.senderEmail) {
+      emails.push( params.senderEmail );
+    }
     User.find({email:{ $in: emails}}, {_id:1, email:1})
     .then(users=>{
       var userIds = [];
@@ -30,7 +34,7 @@ obj.userCreateMsg = function( senderId, recipients, folderName,  subject, messag
         userIds.push(u._id);
         return mp;
       },{});
-      return Folder.find({user:{$in:userIds}, name: {$in:['Sent','Trash', folderName]}}, {user:1, name:1})
+      return Folder.find({user:{$in:userIds}, name: {$in:['Sent','Trash', params.folderName]}}, {user:1, name:1})
     })
     .then(folders=>{
       var sentFolder = null;
@@ -39,23 +43,29 @@ obj.userCreateMsg = function( senderId, recipients, folderName,  subject, messag
         if (f.name == 'Sent') sentFolder = f;
         return mp;
       },{})
-      var sharings = recipients.map((r)=>{
+      var sharings = params.recipients.map((r)=>{
         var userId = emailToUserMap[r.email]._id;
         return {
           user: userId,
           recipientType: r.type,
-          folder: userToFolderMap[folderName+'|'+userId]
+          folder: userToFolderMap[params.folderName+'|'+userId]
         };
       });
       if (sentFolder) {
-        sharings.push({user:senderId, recipientType:'sender', folder: sentFolder._id})
+        sharings.push({user:params.senderId, recipientType:'sender', folder: sentFolder._id})
       }
-      return Message.create({
-        sendingUser: senderId,
+      var message = {
+        sendingUser: params.senderId || emailToUserMap[params.senderEmail],
         sharings: sharings,
-        subject: subject||'',
-        message: message||''
-      })
+        subject: params.subject||'',
+        message: params.message||''
+      };
+      if (params.organizationId) message.organization = params.organizationId;
+      if (params.applicationId) message.applicationId = params.applicationId;
+      if (params.componentId) message.componentId = params.componentId;
+      if (params.appConfigData) message.appConfigData = JSON.stringify(params.appConfigData);
+  
+      return Message.create(message);
     })
     .then(newMsg =>{
       resolve(newMsg);

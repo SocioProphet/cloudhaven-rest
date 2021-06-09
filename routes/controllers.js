@@ -20,7 +20,7 @@ export class UserController extends BaseController{
   list() {
     return this.model
     .find({})
-    .populate({path:'organization', select:{name:1}})
+    .populate({path:'orgMemberships.organization', select:{name:1}})
     .limit(MAX_RESULTS)
     .then((modelInstances) => {
       return modelInstances;

@@ -31,6 +31,20 @@ export class CalendarMgr extends BaseAction {
         res.json({success: true, msg: newEvent});
       })
       .catch(err =>{
+        res.json({success:false, errMsg: (err+'')||'Failed to create event'});
+      })
+    });
+
+    this.post({path:"/appcreateevent"}, (req, res) => {
+      var start = moment(req.body.start).toDate();
+      var end = (!req.body.end && req.body.durationType=='task')?moment(req.body.start).add(15, 'minutes').toDate():
+                  moment(req.body.end).toDate();
+      var params = Object.assign(req.body, {start:start, end:end});
+      CalendarSrvc.appCreateEvent( params )
+      .then(newEvent =>{
+        res.json({success: true, msg: newEvent});
+      })
+      .catch(err =>{
         res.json({success:false, errMsg: 'Failed to create event'});
       })
     });

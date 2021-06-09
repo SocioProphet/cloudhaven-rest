@@ -2,12 +2,10 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcryptjs');
 
-var emailMatch = [/^[^@]+@[^\.]+\..+$/, "Please fill a valid email address"];
-
-var FolderSchema = new Schema({
-});
+var emailMatch = [/^[^@]+@[^\.]+\..+$/, "Please provide a valid email address"];
 
 var UserSchema = new Schema({
+  status: {type: String, required:true, enum:['Email Verification Pending', 'Need Organization Assignment', 'Active', 'Suspended'], default:'Email Verification Pending'}, //Pending for pending email verification
   email: {type: String, unique: true, required: true, match: emailMatch },
   password: { type: String   },
   firstName: { type: String, required: true},
@@ -17,12 +15,15 @@ var UserSchema = new Schema({
   ssn: String,
   language: { type: String, required: true, enum: ['English', 'Spanish'], default:'English' },
   roles: [{type:String, enum: ['SYSADMIN', 'USER']}],
-  organization: { type:Schema.ObjectId, ref:'Organization', required: false },
-  contactId: String,
+  orgMemberships: [{
+    isAdmin: {type: Boolean, default: false},
+      organization: { type:Schema.ObjectId, ref:'Organization', required: false }
+  }], //membership orgs
   subscribedApps: [{
     startDatetime: { type: Date, required: true, default: Date.now},
     organization: { type:Schema.ObjectId, ref:'Organization', required: true },
-    application: { type: String, required: true }
+    application: { type: String, required: true },
+    favorite: { type: Boolean, default: false}
   }]
 });
 

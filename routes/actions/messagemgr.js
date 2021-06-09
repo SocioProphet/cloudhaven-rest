@@ -22,8 +22,9 @@ export class MessageMgr extends BaseAction {
     });
 
     // {recipients:[{type:'', email:''}...], subject, message}
-    this.post({path:"/usersendmsg"}, (req, res) => {
-      MessageSrvc.userCreateMsg( req.body.sender, req.body.recipients, "Inbox",  req.body.subject, req.body.message )
+    this.post({path:"/send"}, (req, res) => {
+      var params = Object.assign( {folderName: "Inbox"}, req.body );
+      MessageSrvc.createMsg( params )
       .then(newMsg =>{
         res.json({success: true, msg: newMsg});
       })
