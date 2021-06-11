@@ -17,7 +17,7 @@ var UserSchema = new Schema({
   roles: [{type:String, enum: ['SYSADMIN', 'USER']}],
   orgMemberships: [{
     isAdmin: {type: Boolean, default: false},
-      organization: { type:Schema.ObjectId, ref:'Organization', required: false }
+    organization: { type:Schema.ObjectId, ref:'Organization', required: false }
   }], //membership orgs
   subscribedApps: [{
     startDatetime: { type: Date, required: true, default: Date.now},

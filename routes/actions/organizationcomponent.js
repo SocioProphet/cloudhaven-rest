@@ -58,7 +58,8 @@ export class OrganizationComponentMgr extends BaseAction{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(
             { _id:mongoose.Types.ObjectId(req.body.organization_Id), 
-              components:{$not:{$elemMatch:{'components.name':component.name}}}}, 
+//              components:{$not:{$elemMatch:{'components.name':component.name}}}}, 
+              components:{$not:{$elemMatch:{'name':component.name}}}}, 
             {$push:{components:component}}, {new:true})
         } else {
           var update = Object.keys(component).reduce((mp,fld)=>{

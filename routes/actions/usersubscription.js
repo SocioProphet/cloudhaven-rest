@@ -30,6 +30,9 @@ export class UserSubscription extends BaseAction{
           res.json({success:true, subscribedApps:subscribedApps});
         }
       })
+      .catch(error => {
+        res.json({success:false, errMsg:error})
+      })
     });
     //subscribe
     this.post({path:"/"}, (req, res) => {
@@ -55,7 +58,7 @@ export class UserSubscription extends BaseAction{
         }
       })
       .catch(error=>{
-        res.json({success:false, errMsg:error+''});
+        res.json({success:false, errMsg:error});
       })
     });
 

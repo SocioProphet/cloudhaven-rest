@@ -1,5 +1,6 @@
 import BaseAction from './baseaction'
 import Roles from '../../models/workflowroles'
+import User from '../../models/user';
 import UserData from '../../models/userdata';
 import UserFile from '../../models/userfile';
 import VariableUserData from '../../models/variableuserdata';
@@ -7,6 +8,7 @@ import {fail} from "../../js/utils"
 import mongoose, { Mongoose } from 'mongoose';
 import fileUpload from 'express-fileupload'
 import mammoth from 'mammoth';
+import moment from 'moment';
 
 function sendResponse( res, userFile, data) {
   var filename = userFile.name+'-_-_-'+userFile.fileName;
@@ -27,19 +29,41 @@ export class UserDataMgr extends BaseAction{
     this.router.use(fileUpload());
     // {userId:'', updates:[{name: '', content:''}, ...]}
     this.post({path:"/batchupsert"}, (req, res) => {
+      var updatesMap = {};
       var promises = req.body.updates.map((u)=>{
-        var promise = UserData.findOneAndUpdate(
+        updatesMap[u.name] = u.content;
+        var promise = UserData.updateOne(
           {user: mongoose.Types.ObjectId(req.body.userId), name: u.name}, 
           {$set:{ user: req.body.userId, name: u.name, content: u.content}},
-          { new:true, upsert: true}
+          { upsert: true}
         );
         return promise;
       });
+      var update = ['email', 'firstName', 'middleName', 'lastName', 'ssn', 'dateOfBirth'].reduce((u,f)=>{
+        u['$set'][f] = f=='dateOfBirth'?(moment(updatesMap[f]).toDate()||null):(updatesMap[f] || '');
+        return u;
+      },{$set:{}})
+      promises.push(User.updateOne({_id:mongoose.Types.ObjectId(req.body.userId)}, update))
       mongoose.Promise.all(promises)
-      .then((result)=>{
-        res.json(result)
+      .then((results)=>{
+        var updateCnt = results.reduce((cnt,r)=>{cnt+=r.ok; return cnt;},0);
+        res.json({success:updateCnt==(req.body.updates.length+1)});
       })
       .then(null, fail(res));
+    });
+
+    this.get({path:'/getuser/:userId'}, (req, res) =>{
+      User.findOne({_id:mongoose.Types.ObjectId(req.params.userId)})
+      .then(user=>{
+        if (user) {
+          res.json({success:true, user:user});
+        } else {
+          res.json({success:false})
+        }
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error});
+      })
     });
 
     //{userIds:'', names:['name1', ...]} 

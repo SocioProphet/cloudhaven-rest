@@ -8,10 +8,43 @@ import mongoose from 'mongoose'
 export class OrganizationUserMgr extends BaseAction{
   constructor(){
     super();
-    this.setRoles(Roles.SysAdmin, Roles.OrganizationAdmin);
+    this.setRoles(Roles.SysAdmin, Roles.User);
   }
   
   route() {
+    this.get({path:'/currentuserorgs'}, (req, res) =>{
+      User.findOne({_id:this.authData.user._id}, {orgMemberships:1})
+      .populate('orgMemberships.organization')
+      .then(user =>{
+        res.json({success:true, orgMemberships: user.orgMemberships});
+      })
+      .catch(error => {
+        res.json({success:false, errMsg:error})
+      })
+    });
+
+    this.post({path:'/createorg'}, (req, res) =>{
+      Organization.create({
+        name: req.body.name,
+        organizationId: req.body.organizationId})
+      .then(org=>{
+        if (org) {
+          User.findOneAndUpdate({
+            _id: this.authData.user._id,
+            orgMemberships:{$not:{$elemMatch:{organization:org._id}}}
+          }, {$push:{orgMemberships:{isAdmin:true, organization:org._id}}, $set:{status:'Active'}}, {new:true})
+          .then(newUser =>{
+            res.json({success:true, newUser:newUser});
+          })
+        } else {
+          res.json({success:false, errMsg:"An organization with this name or Id already exists"});
+        }
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error});
+      })
+
+    });
     this.get({path:"/"}, (req, res) => {
       var contact = req.body.organizationContact;
       if (this.getToken(req.headers)) {
@@ -22,7 +55,8 @@ export class OrganizationUserMgr extends BaseAction{
           } else {
             return Organization.findOneAndUpdate(
               { _id:mongoose.Types.ObjectId(req.body.organizationId), 
-                contacts:{$not:{$elemMatch:{'contacts.name':contact.name, 'contacts.contactInfo.email':contact.contactInfo.email}}}}, 
+//                contacts:{$not:{$elemMatch:{'contacts.name':contact.name, 'contacts.contactInfo.email':contact.contactInfo.email}}}}, 
+                contacts:{$not:{$elemMatch:{'name':contact.name, 'contactInfo.email':contact.contactInfo.email}}}}, 
               {$push:{contacts:contact}}, {new:true})
             .then(organization=>{
               if (!organization) {

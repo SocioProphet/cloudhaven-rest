@@ -9,15 +9,19 @@ var organizationSchema = new Schema( {
     applications:[{
         name: { type: String, required: true},
         applicationId: { type: String, required: true},
+        source: {type: String, enum: ['App Server', 'CloudHaven'], default:'CloudHaven'},
         isApproved: {type: Boolean, default: true},
         mimeType: { type: String, required: false },
         logo: { type: Buffer, required: false },
-        url: {type: String}
+        url: {type: String},
+        pages: [{name: {type: String, required:true}, content:String}]
     }],
     components:[{
         name: { type: String, required: true},
         componentId: { type: String, required: true},
-        isApproved: {type: Boolean, default: true}
+        source: {type: String, enum: ['App Server', 'CloudHaven'], default:'CloudHaven'},
+        isApproved: {type: Boolean, default: true},
+        content: String
     }],
     groups:[{
         name: {type: String, required: true}
