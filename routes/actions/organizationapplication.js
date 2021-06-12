@@ -11,7 +11,7 @@ import { OrganizationUserMgr } from './organizationuser'
 export class OrganizationAppMgr extends BaseAction{
   constructor(){
     super();
-    this.setRoles(Roles.SysAdmin, Roles.OrganizationAdmin);
+    this.setRoles(Roles.SysAdmin, Roles.User);
   }
   
   route() {
@@ -239,3 +239,48 @@ const uiConfig = {
     ]
   }
 };
+
+/*
+
+const x = {
+  requiredUserData: ['firstName', 'lastName'],
+  dataModel:{
+    displayString:''
+  },
+  methods: {
+    mounted: {
+      args:[],
+      body: 'this.displayString = "CloudHaven skeleton application";'
+    }
+  },
+  computed: {
+    decoratedDisplayString: {
+      args:[],
+      body: "return '** '+this.displayString+' **';"
+    }
+  },
+  externalComponents: [{organizationId:'some-org', componentId:'some-component-id'}],
+  appFrame: {
+    name: 'Skeleton App',
+    appBarStyle: {background: 'linear-gradient(rgb(40, 54, 102) 0%, rgb(37, 114, 210) 100%)'},
+    appBarTextClass: 'yellow--text text--accent-2',
+    nameTextClass: 'white--text',
+    menuItems: [ //These are just examples and need to be replaced by real pages
+      { page: 'home', title: 'Dashboard'},
+      { page: 'widgets', title: 'Widgets'}, 
+    ]
+  },
+  uiSchema: {
+    component: 'container',
+    contents: [
+      {component: 'card', props: { elevation: 2 }, contents: [
+        {component: 'cardTitle', contents: 'This is the title' },
+        {component: 'cardText', contents: [
+            {component: 'sheet', props:{'min-width':'200px', 'min-height':'200px'}, class: 'mt-auto mb-auto ml-auto mr-auto',
+              template: '<span>{{decoratedDisplayString}}</span>'}]}
+        ]}
+    ]
+  }
+}
+      
+*/

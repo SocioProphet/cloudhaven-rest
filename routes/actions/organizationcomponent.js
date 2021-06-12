@@ -8,7 +8,7 @@ import axios from 'axios'
 export class OrganizationComponentMgr extends BaseAction{
   constructor(){
     super();
-    this.setRoles(Roles.SysAdmin, Roles.OrganizationAdmin);
+    this.setRoles(Roles.SysAdmin, Roles.User);
   }
   
   route() {

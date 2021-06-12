@@ -9,6 +9,7 @@ import User from "../models/user";
 import EmailVerifyCode from "../models/emailverifycode";
 import { CalendarScheduling } from './actions/calendarscheduling.js';
 import { UserDataMgr } from './actions/userdata.js'
+import { AppStoreMgr } from './actions/appstoremgr.js'
 import { MessageMgr } from './actions/messagemgr.js'
 import { CalendarMgr } from './actions/calendarmgr.js'
 import { ConversationMgr } from './actions/conversation.js'
@@ -240,6 +241,7 @@ export default function() {
     router.use( '/userinfo', new UserInfo().route());
     router.use( '/usersearch', new UserSearch().route());
     router.use( '/userdata', new UserDataMgr().route());
+    router.use( '/appstoremgr', new AppStoreMgr().route());
     router.use( '/messagemgr', new MessageMgr().route());
     router.use( '/calendarmgr', new CalendarMgr().route());
     router.use( '/conversation', new ConversationMgr().route());

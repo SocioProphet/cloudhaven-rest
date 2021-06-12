@@ -37,9 +37,9 @@ export function ok(res){
 export function fail(res){
   return (error) => {
     if (error.code == 11000 || error.code == 11001) {
-      res.json({errMsg:'Save failed: duplicate record.'})
+      res.json({success:false, errMsg:'Save failed: duplicate record.'})
     } else if (error.name === 'ValidationError' || error.message) {
-      res.json({errMsg:error.message})
+      res.json({success:false, errMsg:error.message})
     } else {
       res.sendStatus(404).end();
     }
