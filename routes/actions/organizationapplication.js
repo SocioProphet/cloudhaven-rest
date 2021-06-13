@@ -19,7 +19,7 @@ export class OrganizationAppMgr extends BaseAction{
     this.router.use(fileUpload());
     this.post({path:"/upsert", overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var operation = req.body.operation;
-      var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId};
+      var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId, source:req.body.source};
       (()=>{
         var len = req.files?Object.keys(req.files).length:0;
         if (len==1) {
@@ -57,13 +57,13 @@ export class OrganizationAppMgr extends BaseAction{
       var orgId = mongoose.Types.ObjectId(req.params.organizationId);
       var appId = mongoose.Types.ObjectId(req.params.applicationId)
       var promises = [];
-      promises.push(Organization.findByIdAndUpdate( req.params.organizationId, {$pull:{applications:{_id:req.params.applicationId}}} ));
+      promises.push(Organization.findByIdAndUpdate( req.params.organizationId, {$pull:{applications:{_id:req.params.applicationId}}}, {new:true} ));
       promises.push(User.updateMany({subscribedApps:{$elemMatch:{organization:orgId,application:appId}}},
         {$pull:{subscribedApps:{organization:orgId, application:appId}}}));
       mongoose.Promise.all(promises)
       .then(results=>{
         if (results && results[0] && results[1].ok>0) {
-          res.json({success:true});
+          res.json({success:true, apps:results[0].applications});
         }
       })
       .catch(error=>{

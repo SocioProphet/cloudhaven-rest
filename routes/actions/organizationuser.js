@@ -43,8 +43,29 @@ export class OrganizationUserMgr extends BaseAction{
       .catch(error =>{
         res.json({success:false, errMsg:error});
       })
-
     });
+
+    //name, organizationId, componentsUrl
+    this.post({path:'/updateorg'}, (req, res) =>{
+      var orgId = mongoose.Types.ObjectId(req.body._id);
+      Organization.updateOne({_id:orgId}, {$set:{
+        name:req.body.name,
+        organizationId:req.body.organizationId,
+        componentsUrl: req.body.componentsUrl
+      }}, {new:true})
+      .then(result=>{
+        if (result.ok>0) {
+          res.json({success:true});
+        } else {
+          res.json({success:false, errMsg: 'Organization updated failed.'});
+
+        }
+  })
+      .catch(error =>{
+        res.json({success:false, errMsg:error});
+      })
+    });
+
     this.get({path:"/"}, (req, res) => {
       var contact = req.body.organizationContact;
       if (this.getToken(req.headers)) {
