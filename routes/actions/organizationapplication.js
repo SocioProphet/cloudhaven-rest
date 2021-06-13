@@ -1,6 +1,7 @@
 import BaseAction from './baseaction'
 import {fail} from "../../js/utils"
 import Organization from '../../models/organization'
+import User from '../../models/user'
 import Roles from '../../models/workflowroles'
 import mongoose from 'mongoose'
 import fileUpload from 'express-fileupload'
@@ -53,9 +54,15 @@ export class OrganizationAppMgr extends BaseAction{
       })
     });
     this.delete({path:"/:organizationId/:applicationId"}, (req, res) => {
-      Organization.findByIdAndUpdate( req.params.organizationId, {$pull:{applications:{_id:req.params.applicationId}}} )
-      .then(result=>{
-        if (result && result.n>0) {
+      var orgId = mongoose.Types.ObjectId(req.params.organizationId);
+      var appId = mongoose.Types.ObjectId(req.params.applicationId)
+      var promises = [];
+      promises.push(Organization.findByIdAndUpdate( req.params.organizationId, {$pull:{applications:{_id:req.params.applicationId}}} ));
+      promises.push(User.updateMany({subscribedApps:{$elemMatch:{organization:orgId,application:appId}}},
+        {$pull:{subscribedApps:{organization:orgId, application:appId}}}));
+      mongoose.Promise.all(promises)
+      .then(results=>{
+        if (results && results[0] && results[1].ok>0) {
           res.json({success:true});
         }
       })
@@ -185,6 +192,7 @@ export class OrganizationAppMgr extends BaseAction{
         var applications = organizations.reduce((ar, o)=>{
           ar = ar.concat(o.applications.map((a)=>{
             var app = Object.assign({key:o.name+':'+a.name , organizationId:o._id}, a.toObject());
+            app.organizationName = o.name;
             app.logo = a.logo;
             return app;
           })||[]);

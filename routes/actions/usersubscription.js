@@ -11,6 +11,7 @@ export class UserSubscription extends BaseAction{
   }
   
   route() {
+    //get subscribed apps for a user
     this.get({path:"/:userId"}, (req, res) => {
       if (!req.params.userId && req.params.userId!='undefined') {
         res.status(403).send({success: false, msg: 'No User Id specified.'});
