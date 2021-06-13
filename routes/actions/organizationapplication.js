@@ -240,8 +240,8 @@ const uiConfig = {
   }
 };
 
-/*
 
+/*
 const x = {
   requiredUserData: ['firstName', 'lastName'],
   dataModel:{
@@ -250,7 +250,11 @@ const x = {
   methods: {
     mounted: {
       args:[],
-      body: 'this.displayString = "CloudHaven skeleton application";'
+      body: 'this.displayString = "CloudHaven skeleton application";\
+this._writeAppData("NewTable", "key1", JSON.stringify({aaa:111,bbb:222}), function(data) {\
+  alert(JSON.stringify(data);\
+  this._readAppData("NewTable", "key1", function(data) {alert("read:" + JSON.stringify(data);});\
+});'
     }
   },
   computed: {
@@ -282,5 +286,4 @@ const x = {
     ]
   }
 }
-      
 */
