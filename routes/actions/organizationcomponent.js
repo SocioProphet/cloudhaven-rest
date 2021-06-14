@@ -13,7 +13,7 @@ export class OrganizationComponentMgr extends BaseAction{
   
   route() {
     //Get organization component details
-    //{organizationComps:[{organizationId:'', componentId:''}, ...]}
+    //status, organizationComps:[{organizationId:'', componentId:''}, ...]}
     this.post({path:"/getcomponents"}, (req, res) => {
       var operation = req.body.operation;
       var organizationComponents = req.body.organizationComps.reduce((mp,e)=>{
@@ -21,30 +21,59 @@ export class OrganizationComponentMgr extends BaseAction{
         compList.push(e.componentId);
         return mp;
       },{});
-      var organizationIds = Object.keys(organizationComponents)
+      var organizationIds = Object.keys(organizationComponents);
       Organization.find({organizationId:{$in:organizationIds}}, {_id:1, organizationId:1, components:1, componentsUrl:1})
       .then((organizations)=>{
         if (!organizations) {
           res.json({success:false, errMsg:`Failed to ${operation} component.`});
         } else {
           var promises = [];
+          var localStoredComponents = [];
+          var compOrgs = [];
           organizations.forEach(v=>{
             var validCompMap = v.components.reduce((mp,c)=>{
-              mp[c.componentId] = c.componentId;
+              if (c.status == (req.body.status||'Published'))
+              mp[c.componentId] = c;
               return mp;
             },{})
-            var vComponentIds = organizationComponents[v.organizationId].filter(cId=>(validCompMap[cId]));
-            promises.push(axios.post(v.componentsUrl, {componentIds:vComponentIds}));
+            var fetchComponentIds = organizationComponents[v.organizationId].filter(cId=>{
+              var comp = validCompMap[cId];
+              if (comp) {
+                if (comp.source == 'CloudHaven') {
+                  var uiConfig = {};
+                  try {
+                    uiConfig = eval(comp.content);
+                    uiConfig.componentId = cId;
+                    uiConfig.organizationId = v.organizationId;
+                  } catch(e) {
+                    uiConfig.syntaxError = e+'';
+                  }
+                  localStoredComponents.push(uiConfig);
+                } else {
+                  return true;
+                }
+                return false;
+              }
+            });
+            if (v.componentsUrl && fetchComponentIds.length>0) {
+              compOrgs.push(v.organizationId)
+              promises.push(axios.post(v.componentsUrl, {componentIds:fetchComponentIds}));
+            }
           })
           mongoose.Promise.all(promises)
           .then((results)=>{
             if (!results) {
               res.json({success:false});
             } else {
-              var retComponents = results.reduce((ar,r)=>{
-                ar = ar.concat(r.data);
-                return ar;
-              },[]);
+              var retComponents = [].concat(localStoredComponents);
+              for (var i=0;i<results.length;i++) {
+                r = results[i];
+                orgId = compOrgs[i];
+                retComponents = retComponents.concat(r.data.map(comp=>{
+                  var uiConfig = Object.assign({organizationId:orgId}, comp.uiConfig)
+                  return uiConfig;
+                }));
+              }
               res.json({success:true, components: retComponents});
             }
           })
@@ -53,7 +82,7 @@ export class OrganizationComponentMgr extends BaseAction{
     });
     this.post({path:"/"}, (req, res) => {
       var operation = req.body.operation;
-      var component = {name: req.body.name, componentId: req.body.componentId, source: req.body.source, content: req.body.content};
+      var component = {name: req.body.name, componentId: req.body.componentId, source: req.body.source, status: req.body.status, content: req.body.content};
       (()=>{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(

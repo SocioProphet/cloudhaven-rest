@@ -27,7 +27,7 @@ export class UserSubscription extends BaseAction{
             var application = app.organization.applications.find(sa=>(sa._id==app.application)).toObject();
             application.organization = app.organization.toObject();
             return application;
-          })
+          }).filter(a=>(a.status=='Published'));
           res.json({success:true, subscribedApps:subscribedApps});
         }
       })

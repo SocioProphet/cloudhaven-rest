@@ -14,6 +14,7 @@ var organizationSchema = new Schema( {
         mimeType: { type: String, required: false },
         logo: { type: Buffer, required: false },
         url: {type: String},
+        status: {type: String, required: true, enum:['Draft', 'Published'], default: 'Draft'},
         pages: [{name: {type: String, required:true}, content:String}]
     }],
     components:[{
@@ -21,6 +22,7 @@ var organizationSchema = new Schema( {
         componentId: { type: String, required: true},
         source: {type: String, enum: ['App Server', 'CloudHaven'], default:'CloudHaven'},
         isApproved: {type: Boolean, default: true},
+        status: {type: String, required: true, enum:['Draft', 'Published'], default: 'Draft'},
         content: String
     }],
     groups:[{

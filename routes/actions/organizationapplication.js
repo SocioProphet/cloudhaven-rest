@@ -19,7 +19,7 @@ export class OrganizationAppMgr extends BaseAction{
     this.router.use(fileUpload());
     this.post({path:"/upsert", overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var operation = req.body.operation;
-      var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId, source:req.body.source};
+      var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId, source:req.body.source, status: req.body.status};
       (()=>{
         var len = req.files?Object.keys(req.files).length:0;
         if (len==1) {
@@ -190,7 +190,7 @@ export class OrganizationAppMgr extends BaseAction{
       Organization.find({}, {name:1, organizationId:1, applications:1})
       .then(organizations =>{
         var applications = organizations.reduce((ar, o)=>{
-          ar = ar.concat(o.applications.map((a)=>{
+          ar = ar.concat(o.applications.filter(a=>(a.status=='Published')).map((a)=>{
             var app = Object.assign({key:o.name+':'+a.name , organizationId:o._id}, a.toObject());
             app.organizationName = o.name;
             app.logo = a.logo;
