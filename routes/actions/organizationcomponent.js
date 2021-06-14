@@ -53,7 +53,7 @@ export class OrganizationComponentMgr extends BaseAction{
     });
     this.post({path:"/"}, (req, res) => {
       var operation = req.body.operation;
-      var component = {name: req.body.name, componentId: req.body.componentId, url: req.body.url};
+      var component = {name: req.body.name, componentId: req.body.componentId, source: req.body.source, content: req.body.content};
       (()=>{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(
@@ -79,9 +79,11 @@ export class OrganizationComponentMgr extends BaseAction{
       })
     });
     this.delete({path:"/:organization_Id/:component_Id"}, (req, res) => {
-      Organization.findByIdAndUpdate( req.params.organization_Id, {$pull:{components:{_id:req.params.component_Id}}} )
+      var orgId = mongoose.Types.ObjectId(req.params.organization_Id);
+      var compId = mongoose.Types.ObjectId(req.params.component_Id)
+      Organization.updateOne( {_id: orgId}, {$pull:{components:{_id:compId}}} )
       .then(result=>{
-        if (result && result.n>0) {
+        if (result && result.ok>0) {
           res.json({success:true});
         }
       })
