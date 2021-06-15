@@ -82,7 +82,8 @@ export class OrganizationComponentMgr extends BaseAction{
     });
     this.post({path:"/"}, (req, res) => {
       var operation = req.body.operation;
-      var component = {name: req.body.name, componentId: req.body.componentId, source: req.body.source, status: req.body.status, content: req.body.content};
+      var component = {name: req.body.name, componentId: req.body.componentId, source: req.body.source, status: 
+        req.body.status, keywords: req.body.keywords, documentation:req.body.documentation, content: req.body.content};
       (()=>{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(

@@ -22,11 +22,23 @@ export class AppStoreMgr extends BaseAction{
       .catch(fail(res));
     });
 
-    this.get({path:'/get/:organizationId/:table/:key'}, (req, res) =>{
-      var orgId = mongoose.Types.ObjectId(req.params.organizationId);
-      AppStore.findOne({organization:orgId, table:req.params.table, key:req.params.key})
-      .then(doc =>{
-        res.json({success:true, data:doc});
+    //body: :organizationId, table, key, searchOperator
+    this.post({path:'/read'}, (req, res) =>{
+      var orgId = mongoose.Types.ObjectId(req.body.organizationId);
+      var searchFilter = {organization:orgId, table:req.body.table};
+      if (req.body.key) {
+
+      }
+      if (req.body.searchOperator == 'startsWith') {
+        seaarchFilter.key = {$regex:req.body.key};
+      } else if (req.body.searchOperator == 'contains') {
+        seaarchFilter.key = {$regex:"/"+req.body.key};
+      } else {
+        searchFilter.key = req.body.key;
+      }
+      AppStore.find( searchFilter )
+      .then(results =>{
+        res.json({success:true, data:results});
       })
       .catch(fail(res));
     })

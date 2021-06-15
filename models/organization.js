@@ -23,6 +23,8 @@ var organizationSchema = new Schema( {
         source: {type: String, enum: ['App Server', 'CloudHaven'], default:'CloudHaven'},
         isApproved: {type: Boolean, default: true},
         status: {type: String, required: true, enum:['Draft', 'Published'], default: 'Draft'},
+        keywords: [String],
+        documentation: { type:  String},
         content: String
     }],
     groups:[{
