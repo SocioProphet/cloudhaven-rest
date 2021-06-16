@@ -7,7 +7,6 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import User from "../models/user";
 import EmailVerifyCode from "../models/emailverifycode";
-import { CalendarScheduling } from './actions/calendarscheduling.js';
 import { UserDataMgr } from './actions/userdata.js'
 import { AppStoreMgr } from './actions/appstoremgr.js'
 import { MessageMgr } from './actions/messagemgr.js'
@@ -234,7 +233,6 @@ export default function() {
     router.use( '/users', new UserController().route());
     router.use( '/organizations', new OrganizationController().route());
   
-    router.use( '/calendarscheduling', new CalendarScheduling().route());
     router.use( '/auditlog', new AuditLogReview().route());
     router.use( '/eventlog', new EventLogReview().route());
 

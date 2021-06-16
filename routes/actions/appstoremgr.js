@@ -29,7 +29,7 @@ export class AppStoreMgr extends BaseAction{
       if (req.body.key) {
 
       }
-      if (req.body.searchOperator == 'startsWith') {
+      if (req.body.searchOperator == 'startswith') {
         seaarchFilter.key = {$regex:req.body.key};
       } else if (req.body.searchOperator == 'contains') {
         seaarchFilter.key = {$regex:"/"+req.body.key};

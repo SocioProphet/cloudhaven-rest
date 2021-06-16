@@ -12,6 +12,17 @@ export class UserInfo extends BaseAction{
   }
 
   route() {
+    this.put({path:"/update/:userId"}, (req, res)=>{
+      var userId = mongoose.Types.ObjectId(req.params.userId);
+      User.updateOne({_id:userId}, {$set:Object.assign({},req.body)})
+      .then(result=>{
+        res.json({success:true})
+      })
+      .catch(error=>{
+        res.json({success:false, errMsg:error+''});
+      })
+    });
+
     this.post({path:"/", tag:'Update UserInfo'}, (req, res) => {
       User.findById(req.userId)
       .then((user)=>{

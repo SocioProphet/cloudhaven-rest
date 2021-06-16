@@ -10,6 +10,8 @@ import fileUpload from 'express-fileupload'
 import mammoth from 'mammoth';
 import moment from 'moment';
 
+var coreUserFields = ["email", "firstName", "middleName", "lastName", "dateOfBirth", "ssn", "language"];
+
 function sendResponse( res, userFile, data) {
   var filename = userFile.name+'-_-_-'+userFile.fileName;
   res.writeHead(200, [
@@ -27,11 +29,11 @@ export class UserDataMgr extends BaseAction{
 
   route() {
     this.router.use(fileUpload());
+
     // {userId:'', updates:[{name: '', content:''}, ...]}
     this.post({path:"/batchupsert"}, (req, res) => {
-      var updatesMap = {};
+      var expectedCnt = req.body.updates.length;
       var promises = req.body.updates.map((u)=>{
-        updatesMap[u.name] = u.content;
         var promise = UserData.updateOne(
           {user: mongoose.Types.ObjectId(req.body.userId), name: u.name}, 
           {$set:{ user: req.body.userId, name: u.name, content: u.content}},
@@ -39,15 +41,19 @@ export class UserDataMgr extends BaseAction{
         );
         return promise;
       });
-      var update = ['email', 'firstName', 'middleName', 'lastName', 'ssn', 'dateOfBirth'].reduce((u,f)=>{
-        u['$set'][f] = f=='dateOfBirth'?(moment(updatesMap[f]).toDate()||null):(updatesMap[f] || '');
-        return u;
-      },{$set:{}})
-      promises.push(User.updateOne({_id:mongoose.Types.ObjectId(req.body.userId)}, update))
+      var update = {$set:{}};
+      var updates = req.body.updates.filter(u=>(coreUserFields.indexOf(u.name)>=0));
+      if (updates.length>0) {
+        expectedCnt++;
+        updates.forEach((u)=>{
+          update['$set'][u.name] = u.name=='dateOfBirth'?(moment(u.content).toDate()||null):(u.content || '');
+        })
+        promises.push(User.updateOne({_id:mongoose.Types.ObjectId(req.body.userId)}, update))
+      }
       mongoose.Promise.all(promises)
       .then((results)=>{
         var updateCnt = results.reduce((cnt,r)=>{cnt+=r.ok; return cnt;},0);
-        res.json({success:updateCnt==(req.body.updates.length+1)});
+        res.json({success:updateCnt==expectedCnt, updateCnt:updateCnt, expectedCnt:expectedCnt});
       })
       .then(null, fail(res));
     });

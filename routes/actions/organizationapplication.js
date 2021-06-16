@@ -105,12 +105,12 @@ export class OrganizationAppMgr extends BaseAction{
     this.post({path:"/apppost"}, (req, res) => {
       var app = req.body.app;
       if (req.body.httpMethod=='GET') {
-        axios.get(app.url+'/'+req.body.postId)
+        axios.get(app.url+'/'+req.body.operationId)
         .then((response)=>{
           res.json(response.data);
         })
       } else if (req.body.httpMethod=='POST') {
-        axios.post(app.url+'/'+req.body.postId, req.body.postData)
+        axios.post(app.url+'/'+req.body.operationId, req.body.postData)
         .then((response)=>{
           res.json(response.data);
         })
@@ -125,12 +125,12 @@ export class OrganizationAppMgr extends BaseAction{
         formData.append(fileKey, file.data);
       })
       Object.keys(req.body).forEach((key)=>{
-        if (key != '_appUrl' && key !='_postId' && key.indexOf('files.')!=0) {
+        if (key != '_appUrl' && key !='_operationId' && key.indexOf('files.')!=0) {
           formData.append(key, req.body[key]);
         }
       });
       var appUrl = req.body._appUrl;
-      axios.post(appUrl+'/'+req.body._postId, formData, {headers: formData.getHeaders()})
+      axios.post(appUrl+'/'+req.body._operationId, formData, {headers: formData.getHeaders()})
       .then((response)=>{
         res.json(response.data);
       })
@@ -138,7 +138,7 @@ export class OrganizationAppMgr extends BaseAction{
 
     this.post({path:'/appgetfile'}, (req, res) => {
       var appUrl = req.body.appUrl;
-      var URL = `${appUrl}/${req.body.postId}/${req.body.fileId}`;
+      var URL = `${appUrl}/${req.body.operationId}/${req.body.fileId}`;
       axios.get(URL, {responseType: 'arraybuffer', timeout: 30000 })
       .then(response => {
         if (!response) {

@@ -79,9 +79,9 @@ obj.getPasswordResetForm = function( email, code ) {
           <v-spacer></v-spacer>
           <v-col cols="4" class="px-1">
           <v-card height="650px" style="background: linear-gradient(to bottom, #FFFFFF -10%, #00528d 100%);" class="pt-9 ">
-            <div class="pa-6"><v-img  :src="logoDataURI" /></div>
+            <div class="pa-6"><v-img class="ml-auto mr-auto" max-width="450px"  :src="logoDataURI" /></div>
             <div>
-            <span class='text-h2'><b>CloudHaven</b></span>
+            <span class='text-h3'><b>CloudHaven</b></span>
             </div>
           </v-card>
           </v-col>
