@@ -122,6 +122,63 @@ export class OrganizationComponentMgr extends BaseAction{
       })
     });
 
+    this.get({path:'/getcomponentkeywords'}, (req, res) =>{
+      Organization.find({}, {'components.keywords':1})
+      .then(orgs =>{
+        var kwMap = orgs.reduce((mp,org)=>{
+          org.components.forEach(comp=>{
+            comp.keywords.forEach(kw=>{
+              mp[kw] = kw;
+            })
+          })
+          return mp;
+        }, {})
+        res.json({success:true, keywords:Object.keys(kwMap).sort((a,b)=>(a<b?-1:(a>b?1:0)))});
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error+''});
+      })
+    });
+
+    //keywordsFilter:[], nameFilter:''
+    /*
+db.organizations.find({components:{$elemMatch:{$and:[
+{keywords:{$elemMatch:{$in:['apple','orange']}}},
+{isApproved:true}, {status:'Published'}
+]}}}, {name:1})
+    */
+    this.post({path:'/searchcomponents'}, (req, res) =>{
+      var filter = {components:{$elemMatch:{$and:[{isApproved:true}, {status:'Published'}]}}};
+      if (req.body.keywordsFilter && req.body.keywordsFilter.length>0) {
+        filter.components.$elemMatch.$and.push({$in:req.body});
+      }
+      if (req.body.nameFilter) {
+        filter.components.$elemMatch.$and.push({name:{$regex:req.body.nameFilter}});
+      }
+      Organization.find(filter, {name:1, organizationId:1, components:{name:1, componentId:1, keywords:1, documentation:1}})
+      .then(orgs=>{
+        var components = orgs.reduce((ar, org) => {
+          org.components.forEach(comp => {
+            if (!req.body.keywords || req.body.keywords.length==0 || _.intersection([req.body.keywords,comp.keywords]).length>0) {
+              if (!req.body.nameFilter || comp.name.indexOf(req.body.nameFilter)>=0) {
+                var obj = {organizationName: org.name, organizationId: org.organizationId,
+                  componentName:comp.name, componentId:comp.componentId, documentation: comp.documentation};
+                obj.key = obj.organizationName+'-'+obj.componentName;
+                ar.push(obj);
+              }
+            }
+          })
+          return ar;
+        },[])
+        components = components.sort((a,b)=>(a.key<b.key?-1:(a.key>b.key?1:0)))
+        res.json({success:true, components:components});
+      })
+      .catch(error =>{
+        var errMsg = error+'';
+        res.json({success:false, errMsg:errMsg})
+      })
+    })
+
     /*this.post("/apppost", (req, res) => {
 //      if (this.getToken(req.headers)) {
       var app = req.body.app;

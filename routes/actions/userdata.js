@@ -75,11 +75,14 @@ export class UserDataMgr extends BaseAction{
       }
       UserData.find(filter)
       .then((userDataList)=>{
-        res.json(userDataList.reduce((mp,r)=>{
+        res.json({success:true, userDataMap:userDataList.reduce((mp,r)=>{
           var list = mp[r.user] || (mp[r.user]=[]);
           list.push(r);
           return mp;
-        },{}))
+        },{})});
+      })
+      .catch(error=>{
+        res.json({success:false, errMsg: error+''});
       })
     });
 
