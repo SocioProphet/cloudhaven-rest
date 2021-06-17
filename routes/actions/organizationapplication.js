@@ -20,6 +20,9 @@ export class OrganizationAppMgr extends BaseAction{
     this.post({path:"/upsert", overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var operation = req.body.operation;
       var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId, source:req.body.source, status: req.body.status};
+      if (req.body.pages) {
+        application.pages = JSON.parse(req.body.pages);
+      }
       (()=>{
         var len = req.files?Object.keys(req.files).length:0;
         if (len==1) {
