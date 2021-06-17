@@ -91,7 +91,6 @@ app.use((req, res, next) => {
   var logger2 = function(req, res, next) {
     console.log('Req:'+req.method);
     console.log('Path:'+req.path);
-    console.log('Params:'+JSON.stringify(req.params));
     next(); // Passing the request to the next handler in the stack.
   }
   app.use(logger2);
