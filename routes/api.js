@@ -207,6 +207,7 @@ export default function() {
     router.post('/login', (req, res) => {
       User.findOne({email: req.body.email},
         {email:1, password:1, status:1, firstName:1, lastName:1, name:1, roles:1, orgMemberships:1})
+      .populate('orgMemberships.organization')
       .then(user => {
         if (!user) {
           res.status(401).send({success: false, msg: 'Authentication failed. User not found.'});

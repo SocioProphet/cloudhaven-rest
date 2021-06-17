@@ -60,6 +60,7 @@ export class UserDataMgr extends BaseAction{
 
     this.get({path:'/getuser/:userId'}, (req, res) =>{
       User.findOne({_id:mongoose.Types.ObjectId(req.params.userId)})
+      .populate('orgMemberships.organization')
       .then(user=>{
         if (user) {
           res.json({success:true, user:user});
