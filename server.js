@@ -76,7 +76,7 @@ const app = express();
 
 //app.use(pdf);
 app.use(cors({
-  exposedHeaders: ['Content-Disposition'],
+  exposedHeaders: ['Content-Disposition']
 }));
 //Serving the files on the dist folder
 app.use(express.static(DIST_DIR));
