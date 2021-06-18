@@ -16,7 +16,8 @@ export class UserSearch extends BaseAction{
     this.post({path:"/"}, (req, res) => {
       var phrase = req.body.phrase;
       var searchCriteria = {
-        $or: [{ firstName: { $regex: phrase, $options: 'i'} },
+        $or: [{ email:  { $regex: phrase, $options: 'i'} },
+          { firstName: { $regex: phrase, $options: 'i'} },
           { lastName: { $regex: phrase, $options: 'i'} },
           { ssn: { $regex: phrase, $options: 'i'} }]
       }

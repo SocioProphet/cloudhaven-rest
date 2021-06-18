@@ -83,7 +83,8 @@ export class UserDataMgr extends BaseAction{
       UserData.find(filter)
       .then((userDataList)=>{
         res.json({success:true, userDataMap:userDataList.reduce((mp,r)=>{
-          var list = mp[r.user] || (mp[r.user]=[]);
+          var userId = r.user._id.toString();
+          var list = mp[userId] || (mp[userId]=[]);
           list.push(r);
           return mp;
         },{})});
