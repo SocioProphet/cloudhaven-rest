@@ -18,7 +18,6 @@ var organizationSchema = new Schema( {
         pages: [{name: {type: String, required:true}, content:String}]
     }],
     components:[{
-        name: { type: String, required: true},
         componentId: { type: String, required: true},
         source: {type: String, enum: ['App Server', 'CloudHaven'], default:'CloudHaven'},
         isApproved: {type: Boolean, default: true},

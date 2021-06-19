@@ -150,20 +150,20 @@ db.organizations.find({components:{$elemMatch:{$and:[
     this.post({path:'/searchcomponents'}, (req, res) =>{
       var filter = {components:{$elemMatch:{$and:[{isApproved:true}, {status:'Published'}]}}};
       if (req.body.keywordsFilter && req.body.keywordsFilter.length>0) {
-        filter.components.$elemMatch.$and.push({$in:req.body});
+        filter.components.$elemMatch.$and.push({keywords:{$elemMatch:{$in:req.body.keywordsFilter}}});
       }
       if (req.body.nameFilter) {
-        filter.components.$elemMatch.$and.push({name:{$regex:req.body.nameFilter}});
+        filter.components.$elemMatch.$and.push({componentId:{$regex:req.body.nameFilter}});
       }
-      Organization.find(filter, {name:1, organizationId:1, components:{name:1, componentId:1, keywords:1, documentation:1}})
+      Organization.find(filter, {name:1, organizationId:1, components:{componentId:1, keywords:1, documentation:1}})
       .then(orgs=>{
         var components = orgs.reduce((ar, org) => {
           org.components.forEach(comp => {
             if (!req.body.keywords || req.body.keywords.length==0 || _.intersection([req.body.keywords,comp.keywords]).length>0) {
-              if (!req.body.nameFilter || comp.name.indexOf(req.body.nameFilter)>=0) {
+              if (!req.body.nameFilter || comp.componentId.indexOf(req.body.nameFilter)>=0) {
                 var obj = {organizationName: org.name, organizationId: org.organizationId,
-                  componentName:comp.name, componentId:comp.componentId, documentation: comp.documentation};
-                obj.key = obj.organizationName+'-'+obj.componentName;
+                  componentId:comp.componentId, documentation: comp.documentation};
+                obj.key = obj.organizationName+'-'+obj.componentId;
                 ar.push(obj);
               }
             }
