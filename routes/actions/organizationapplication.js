@@ -19,6 +19,7 @@ export class OrganizationAppMgr extends BaseAction{
     this.router.use(fileUpload());
     this.post({path:"/upsert", overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var operation = req.body.operation;
+      var appId = req.body._id?mongoose.Types.ObjectId(req.body._id):null;
       var application = {name: req.body.name, url: req.body.url, applicationId: req.body.applicationId, source:req.body.source, status: req.body.status};
       if (req.body.pages) {
         application.pages = JSON.parse(req.body.pages);
@@ -37,7 +38,7 @@ export class OrganizationAppMgr extends BaseAction{
           return Organization.findOneAndUpdate(
             { _id:mongoose.Types.ObjectId(req.body.organization_Id), 
 //              applications:{$not:{$elemMatch:{'applications.applicationId':application.applicationId}}}}, 
-              applications:{$not:{$elemMatch:{'applicationId':application.applicationId}}}}, 
+              applications:{$not:{$elemMatch:{'_id':appId}}}}, 
             {$push:{applications:application}}, {new:true})
         } else {
           var update = Object.keys(application).reduce((mp,fld)=>{
@@ -45,7 +46,7 @@ export class OrganizationAppMgr extends BaseAction{
             return mp;
           },{});
           return Organization.findOneAndUpdate({_id:mongoose.Types.ObjectId(req.body.organization_Id)},
-            {$set:update}, {new:true, arrayFilters:[{'elem._id':mongoose.Types.ObjectId(req.body._id)}]})
+            {$set:update}, {new:true, arrayFilters:[{'elem._id':appId}]})
         }
       })()
       .then(organization=>{
@@ -74,10 +75,10 @@ export class OrganizationAppMgr extends BaseAction{
       })
     });
 
-    this.delete({path:"/page/:organizationId/:applicationId/:pageName", overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
+    this.delete({path:"/page/:organizationId/:applicationId/:pageId", overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var orgId = mongoose.Types.ObjectId(req.params.organizationId);
       var appId = mongoose.Types.ObjectId(req.params.applicationId)
-      Organization.findOneAndUpdate({_id:orgId}, {$pull:{'applications.$[app].pages': {name:req.params.pageName}}},
+      Organization.findOneAndUpdate({_id:orgId}, {$pull:{'applications.$[app].pages': {_id:req.params.pageId}}},
         {new:true, arrayFilters:[{'app._id':appId}]})
       .then(newOrg=>{
         var app = newOrg.applications.find(a=>(a._id.toString()==req.body.applicationId));
@@ -160,10 +161,11 @@ export class OrganizationAppMgr extends BaseAction{
       })
     })
 
-    //{organizationId, applicationId, pageName, content}
+    //{organizationId, applicationId, pageId, pageName, content}
     this.post({path:'/writepage', overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var orgId = mongoose.Types.ObjectId(req.body.organizationId);
       var appId = mongoose.Types.ObjectId(req.body.applicationId)
+      var pageId = mongoose.Types.ObjectId(req.body.pageId)
       Organization.findOne({_id: orgId})
       .then(org =>{
         var app = org.applications.find(a=>(a._id.toString()==req.body.applicationId));
@@ -171,12 +173,14 @@ export class OrganizationAppMgr extends BaseAction{
           res.json({success:false, errMsg:'Application does not exist.'})
           return null;
         }
-        var pageExists = app.pages.find(p=>(p.name==req.body.pageName));
+        var pageExists = pageId && app.pages.find((p)=>{
+          return p._id.toString()==(req.body.pageId);
+        });
         if (pageExists) {
-          return Organization.findOneAndUpdate({_id:orgId}, {$set:{'applications.$[app].pages.$[pg].content': req.body.content}}, 
-            {new:true, arrayFilters:[{'app._id':appId}, {'pg.name':req.body.pageName}]})
+          return Organization.findOneAndUpdate({_id:orgId}, {$set:{'applications.$[app].pages.$[pg].content': req.body.content, 'applications.$[app].pages.$[pg].name': req.body.name}},
+            {new:true, arrayFilters:[{'app._id':appId}, {'pg._id':pageId}]})
         } else {
-          return Organization.findOneAndUpdate({_id:orgId}, {$push:{'applications.$[app].pages': {name:req.body.pageName, content: req.body.content}}},
+          return Organization.findOneAndUpdate({_id:orgId}, {$push:{'applications.$[app].pages': {name:req.body.name, content: req.body.content}}},
             {new:true, arrayFilters:[{'app._id':appId}]})
         }
       })
