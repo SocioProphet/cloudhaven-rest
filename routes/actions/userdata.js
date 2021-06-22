@@ -171,7 +171,7 @@ export class UserDataMgr extends BaseAction{
         promise = UserFile.deleteOne({user:mongoose.Types.ObjectId(userId), _id:mongoose.Types.ObjectId(req.body.fileId)});
       }
       promise.then(result=>{
-        res.json({success:true})
+        res.json({success:result.ok==1})
       })
       .then(null, fail(res));
     });
