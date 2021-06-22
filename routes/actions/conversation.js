@@ -15,8 +15,7 @@ export class ConversationMgr extends BaseAction{
     this.post({path:"/", overrideRoles:[Roles.ANY]}, (req, res) => {
       Conversation.findOne({
           organization:mongoose.Types.ObjectId(req.body.application.organizationId),
-          applicationId: req.body.application.applicationId,
-          page: req.body.application.page,
+          applicationId: req.body.application._id,
           topic: req.body.topic})
       .populate('owner')
       .populate({path:'comments', populate: {path: 'owner'}})
@@ -41,23 +40,24 @@ export class ConversationMgr extends BaseAction{
     // {userId:'', topic: '', content: ''}
     this.post({path:"/create", overrideRoles:[Roles.ANY]}, (req, res) => {
       var userId = mongoose.Types.ObjectId(req.body.userId);
+      var orgId = mongoose.Types.ObjectId(req.body.application.organizationId);
 
       VariableUserData.create({
-        owner:userId, 
+        owner:userId,
+        organization: orgId,
+        key: (req.body.application._id||'') + ':' + (req.body.topic||''),
         content: req.body.content})
       .then(comment=>{
         return Conversation.findOneAndUpdate(
-          {organization:mongoose.Types.ObjectId(req.body.application.organizationId),
-            applicationId: req.body.application.applicationId,
-            page: req.body.application.page,
-            topic: req.body.topic},
+          {organization:orgId,
+            applicationId: req.body.application._id,
+            topic: req.body.topic||''},
           { $set: {
           owner: userId,
-          organizationId: req.body.application.organizationId,
-          applicationId: req.body.application.applicationId,
-          page: req.body.application.page,
+          organization: orgId,
+          applicationId: req.body.application._id,
           topic: req.body.topic,
-          comments:[comment]
+          comments:[comment._id]
         }}, {upsert: true, new: true})
         .populate('owner')
         .populate({path:'comments', populate: {path: 'owner'}})
@@ -71,13 +71,18 @@ export class ConversationMgr extends BaseAction{
     // {conversationId:'', authorId:'', content: ''}
     this.post({path:"/addcomment", overrideRoles:[Roles.ANY]}, (req, res) => {
       var authorId = mongoose.Types.ObjectId(req.body.authorId);
+      var conversationId = mongoose.Types.ObjectId(req.body.conversationId);
       var newComment = null;
-      VariableUserData.create({owner:authorId, content: req.body.content})
+      Conversation.findOne({_id:conversationId}, {organization:1, applicationId:1, topic:1})
+      .then(c=>{
+        var key = (c.applicationId||'') + ':' + (c.topic||'');
+        return VariableUserData.create({owner:authorId, organization:c.organization, key:key, content: req.body.content})
+      })
       .then(comment=>{
         newComment = comment;
         return Conversation.findOneAndUpdate(
-          {_id:mongoose.Types.ObjectId(req.body.conversationId)},
-          {$push:{comments:comment}},
+          {_id:conversationId},
+          {$push:{comments:comment._id}},
           {new:true}
         )
       })

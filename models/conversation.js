@@ -1,6 +1,4 @@
 var mongoose = require('mongoose');
-import VariableUserData from'./variableuserdata.js';
-var VariableUserDataSchema = VariableUserData.schema;
 var Schema = mongoose.Schema;
 
 
@@ -9,9 +7,8 @@ var ConversationSchema = new Schema({
   owner: { type:Schema.ObjectId, ref:'User', required: true },
   organization: { type:Schema.ObjectId, ref:'Organization' },
   applicationId: String,
-  page: String,
   topic: { type: String, required: false},
-  comments: [VariableUserDataSchema]
+  comments: [{ type:Schema.ObjectId, ref:'VariableUserData'}]
 });
 
 module.exports = mongoose.model('Conversation', ConversationSchema);

@@ -40,15 +40,7 @@ export class OrganizationComponentMgr extends BaseAction{
               var comp = validCompMap[cId];
               if (comp) {
                 if (comp.source == 'CloudHaven') {
-                  var uiConfig = {};
-                  try {
-                    uiConfig = eval(comp.content);
-                    uiConfig.componentId = cId;
-                    uiConfig.organizationId = v.organizationId;
-                  } catch(e) {
-                    uiConfig.syntaxError = e+'';
-                  }
-                  localStoredComponents.push(uiConfig);
+                  localStoredComponents.push({stringContent:comp.content, componentId: cId, organizationId: v.organizationId});
                 } else {
                   return true;
                 }
@@ -65,7 +57,7 @@ export class OrganizationComponentMgr extends BaseAction{
             if (!results) {
               res.json({success:false});
             } else {
-              var retComponents = [].concat(localStoredComponents);
+              var retComponents = [];
               for (var i=0;i<results.length;i++) {
                 r = results[i];
                 orgId = compOrgs[i];
@@ -74,7 +66,7 @@ export class OrganizationComponentMgr extends BaseAction{
                   return uiConfig;
                 }));
               }
-              res.json({success:true, components: retComponents});
+              res.json({success:true, components: retComponents, rawComponents:localStoredComponents});
             }
           })
         }
