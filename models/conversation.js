@@ -8,7 +8,7 @@ var ConversationSchema = new Schema({
   organization: { type:Schema.ObjectId, ref:'Organization' },
   applicationId: String,
   topic: { type: String, required: false},
-  comments: [{ type:Schema.ObjectId, ref:'VariableUserData'}]
+  comments: [{ type:Schema.ObjectId, ref:'MultiInstanceUserData'}]
 });
 
 module.exports = mongoose.model('Conversation', ConversationSchema);

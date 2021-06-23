@@ -3,7 +3,7 @@ import Roles from '../../models/workflowroles'
 import User from '../../models/user';
 import UserData from '../../models/userdata';
 import UserFile from '../../models/userfile';
-import VariableUserData from '../../models/variableuserdata';
+import MultiInstanceUserData from '../../models/multiinstanceuserdata';
 import {fail} from "../../js/utils"
 import mongoose, { Mongoose } from 'mongoose';
 import fileUpload from 'express-fileupload'
@@ -97,7 +97,7 @@ export class UserDataMgr extends BaseAction{
     //{userId:'', names:['name1', ...]} 
     this.get({path:"/getbulkdata/:userId"}, (req, res) => {
         var userId = mongoose.Types.ObjectId(req.params.userId);
-        VariableUserData.find({owner:userId})
+        MultiInstanceUserData.find({owner:userId})
         .then(( list )=>{
           res.json(list)
         })

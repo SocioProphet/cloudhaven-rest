@@ -1,6 +1,6 @@
 import BaseAction from './baseaction'
 import Roles from '../../models/workflowroles'
-import VariableUserData from '../../models/variableuserdata';
+import MultiInstanceUserData from '../../models/multiinstanceuserdata';
 import Conversation from '../../models/conversation';
 import {fail} from "../../js/utils"
 import mongoose, { Mongoose } from 'mongoose';
@@ -42,7 +42,7 @@ export class ConversationMgr extends BaseAction{
       var userId = mongoose.Types.ObjectId(req.body.userId);
       var orgId = mongoose.Types.ObjectId(req.body.application.organizationId);
 
-      VariableUserData.create({
+      MultiInstanceUserData.create({
         owner:userId,
         organization: orgId,
         key: (req.body.application._id||'') + ':' + (req.body.topic||''),
@@ -76,7 +76,7 @@ export class ConversationMgr extends BaseAction{
       Conversation.findOne({_id:conversationId}, {organization:1, applicationId:1, topic:1})
       .then(c=>{
         var key = (c.applicationId||'') + ':' + (c.topic||'');
-        return VariableUserData.create({owner:authorId, organization:c.organization, key:key, content: req.body.content})
+        return MultiInstanceUserData.create({owner:authorId, organization:c.organization, key:key, content: req.body.content})
       })
       .then(comment=>{
         newComment = comment;
@@ -96,7 +96,7 @@ export class ConversationMgr extends BaseAction{
     this.post({path:"/updatecomment", overrideRoles:[Roles.ANY]}, (req, res) => {
       var varUserDataId = mongoose.Types.ObjectId(req.body.contentId);
 
-      VariableUserData.findOneAndUpdate({_id:varUserDataId}, 
+      MultiInstanceUserData.findOneAndUpdate({_id:varUserDataId}, 
         {$set:{content: req.body.content, modified_at: new Date()}}, {new: true} )
       .then((varUserData)=>{
         res.json({success:true, content:varUserData})
@@ -110,7 +110,7 @@ export class ConversationMgr extends BaseAction{
 
         Conversation.findOneAndUpdate( {_id: conversationId}, {$pull:{comments:{_id:commentId}}}, {new: true} )
         .then(conversation=>{
-          return VariableUserData.deleteOne({_id: commentId})
+          return MultiInstanceUserData.deleteOne({_id: commentId})
         })
         .then(results=>{
           if (results && results.n>0) {
