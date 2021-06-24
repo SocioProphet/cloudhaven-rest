@@ -81,7 +81,7 @@ export class OrganizationAppMgr extends BaseAction{
       Organization.findOneAndUpdate({_id:orgId}, {$pull:{'applications.$[app].pages': {_id:req.params.pageId}}},
         {new:true, arrayFilters:[{'app._id':appId}]})
       .then(newOrg=>{
-        var app = newOrg.applications.find(a=>(a._id.toString()==req.body.applicationId));
+        var app = newOrg.applications.find(a=>(a._id.toString()==req.params.applicationId));
         res.json({success:true, pages:app?app.pages:[]});
       })
       .catch(error=>{
@@ -165,7 +165,7 @@ export class OrganizationAppMgr extends BaseAction{
     this.post({path:'/writepage', overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) => {
       var orgId = mongoose.Types.ObjectId(req.body.organizationId);
       var appId = mongoose.Types.ObjectId(req.body.applicationId)
-      var pageId = mongoose.Types.ObjectId(req.body.pageId)
+      var pageId = req.body.pageId?mongoose.Types.ObjectId(req.body.pageId):'';
       Organization.findOne({_id: orgId})
       .then(org =>{
         var app = org.applications.find(a=>(a._id.toString()==req.body.applicationId));

@@ -34,7 +34,7 @@ obj.createUserMessageFolders = function( userId ) {
   })
   return promise;
 };
-obj.userSearch = function( searchPhrase ) {
+obj.userSearch = function( searchPhrase, dateOfBirth ) {
   function makeFilter(searchPhrase) {
     return  {$or: [
       { email: { '$regex': searchPhrase+'', '$options': 'i'}},
@@ -42,17 +42,25 @@ obj.userSearch = function( searchPhrase ) {
       { lastName: { '$regex': searchPhrase+'', '$options': 'i'}}
     ]};  
   }
-  var filter = null;
-  if (searchPhrase.indexOf(' ')>0) {
-    var parts = searchPhrase.split(' ').filter(sp=>(sp!=''));
-    filter = parts.reduce((f,p)=>{
-      f.$and.push(makeFilter(p));
-      return f;
-    },{$and: []});
-  } else {
-    filter = makeFilter(searchPhrase);
+  var filter = {};
+  if (searchPhrase) {
+    if (searchPhrase.indexOf(' ')>0) {
+      var parts = searchPhrase.split(' ').filter(sp=>(sp!=''));
+      filter = parts.reduce((f,p)=>{
+        f.$and.push(makeFilter(p));
+        return f;
+      },{$and: []});
+    } else {
+      filter = makeFilter(searchPhrase);
+    }
   }
-  return User.find(filter, {email:1, firstName:1, middelName:1, lastName:1 });
+  if (dateOfBirth) {
+    var lowBnd = moment(req.body.dateOfBirth).startOf('day');
+    var highBnd = moment(lowBnd).add(1, 'days');
+    filter.dateOfBirth = { $gte: lowBnd.toDate(), $lt: highBnd.toDate()};
+  }
+  return User.find(filter, {email:1, firstName:1, middelName:1, lastName:1, dateOfBirth:1 });
 }
 
 export default obj;
+

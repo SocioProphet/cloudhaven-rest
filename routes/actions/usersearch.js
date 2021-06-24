@@ -36,15 +36,17 @@ export class UserSearch extends BaseAction{
     });
 
     this.post({path:'/emailnamesearch', overrideRoles:['SYSADMIN', 'USER']}, (req, res) =>{
-      if (!req.body.searchPhrase) {
+      if (!req.body.searchPhrase && !req.body.dateOfBirth) {
         res.json([]);
+        return;
       }
-      UserSrvc.userSearch( req.body.searchPhrase )
+      UserSrvc.userSearch( req.body.searchPhrase, req.body.dateOfBirth )
       .then(users=>{
         res.json(users)
       })
-      .catch(()=>{
-        res.json([]);
+      .catch(error=>{
+        console.log(error+'');
+        res.json(null);
       })
     });
   

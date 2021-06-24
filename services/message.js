@@ -66,7 +66,7 @@ obj.queueTask = function( params ) {
 obj.userCreateMsg = function( params ) {
   var promise = new Promise(function( resolve, reject) {
     var emailToUserMap = {};
-    var emails = params.recipients.map(r=>(r.email));
+    var emails = params.recipients.map(r=>(_.isString(r)?r:r.email));
     if (!params.senderId && params.senderEmail) {
       emails.push( params.senderEmail );
     }
