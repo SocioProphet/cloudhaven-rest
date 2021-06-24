@@ -74,14 +74,13 @@ export class OrganizationComponentMgr extends BaseAction{
     });
     this.post({path:"/"}, (req, res) => {
       var operation = req.body.operation;
-      var component = {name: req.body.name, componentId: req.body.componentId, source: req.body.source, status: 
+      var component = {componentId: req.body.componentId, source: req.body.source, status: 
         req.body.status, keywords: req.body.keywords, documentation:req.body.documentation, content: req.body.content};
       (()=>{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(
             { _id:mongoose.Types.ObjectId(req.body.organization_Id), 
-//              components:{$not:{$elemMatch:{'components.name':component.name}}}}, 
-              components:{$not:{$elemMatch:{'name':component.name}}}}, 
+              components:{$not:{$elemMatch:{'componentId':component.componentId}}}}, 
             {$push:{components:component}}, {new:true})
         } else {
           var update = Object.keys(component).reduce((mp,fld)=>{
@@ -98,6 +97,9 @@ export class OrganizationComponentMgr extends BaseAction{
         } else {
           res.json({success:true, components:organization.components});
         }
+      })
+      .catch(error=>{
+        console.log(error+'');
       })
     });
     this.delete({path:"/:organization_Id/:component_Id"}, (req, res) => {
