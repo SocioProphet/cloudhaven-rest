@@ -2,12 +2,32 @@ import mongoose from 'mongoose';
 import Folder from '../models/folder';
 import Message from '../models/message';
 import User from '../models/user'
+import Organization from '../models/organization'
 import _ from 'lodash'
 
 var obj = {};
 
+function ensureRequiredFolders( userId, folders ) {
+  var requiredFolders = {Inbox:1, Sent:1, Trash:1};
+  folders.forEach(f=>{
+    if (!f.parentFolder) {
+      delete requiredFolders[f.name];
+    }
+  });
+  var foldersToAdd = Object.keys(requiredFolders).map(fn=>({name:fn, user:userId}));
+  return foldersToAdd.length>0?Folder.insertMany(foldersToAdd):mongoose.Promise.resolve([]);
+}
 obj.getUserFolderTree = function( userId ) {
-    return Folder.find( {user:userId} );
+    return Folder.find( {user:userId} )
+    .then( folders =>{
+      return ensureRequiredFolders(userId, folders)
+      .then(addlFolders=>{
+        return folders.concat(addlFolders);
+      })
+    })
+    .catch(error=>{
+      console.log(error);
+    })
 };
 
 obj.getFolderMsgs = function( userId, folderId ) {
@@ -15,6 +35,30 @@ obj.getFolderMsgs = function( userId, folderId ) {
   if (_.isString(folderId)) folderId = mongoose.Types.ObjectId(folderId);
   return Message.find({sharings: {$elemMatch:{user:userId, folder:folderId}}})
     .populate({path: 'sharings.user', select:{name:1, firstName:1, middleName:1, lastName:1}})
+}
+
+//Get all of the tasks for all of the groups for which a user is a member
+//params: userId
+obj.getUnassignedTasksForUser = function( pUserId ) {
+  var userId = mongoose.Types.ObjectId(pUserId);
+  return Organization.find({'groups.members':{$elemMatch:{$eq:userId}}})
+  .then(orgs =>{
+    var groupIds = orgs.reduce((ar, o)=>{
+      ar = ar.concat(o.groups.filter(g=>(g.members.find(m=>(m.toString()==pUserId)))));
+      return ar;
+    },[]).map(g=>(g._id));
+    return Message.find({sharings:{$elemMatch:{recipientType:'taskqueue', groupId:{$in:groupIds}}}})
+  })
+}
+//params: groupId, subject, message
+obj.queueTask = function( params ) {
+  return Message.create(
+    {
+      sharings:[{groupId:params.groupId, recipientType:'taskqueue'}],
+      subject: params.subject || '',
+      message: params.message || '',
+      applicationId: params.applicationId || ''
+    });
 }
 
 //params: senderId, recipients, folderName, subject, message

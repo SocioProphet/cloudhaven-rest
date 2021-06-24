@@ -35,7 +35,7 @@ export class UserSearch extends BaseAction{
       });
     });
 
-    this.post({path:'/emailnamesearch'}, (req, res) =>{
+    this.post({path:'/emailnamesearch', overrideRoles:['SYSADMIN', 'USER']}, (req, res) =>{
       if (!req.body.searchPhrase) {
         res.json([]);
       }

@@ -35,11 +35,23 @@ obj.createUserMessageFolders = function( userId ) {
   return promise;
 };
 obj.userSearch = function( searchPhrase ) {
-  var filter = {$or: [
-    { email: { '$regex': searchPhrase, '$options': 'i'}},
-    { firstName: { '$regex': searchPhrase, '$options': 'i'}},
-    { lastName: { '$regex': searchPhrase, '$options': 'i'}}
-]};
+  function makeFilter(searchPhrase) {
+    return  {$or: [
+      { email: { '$regex': searchPhrase+'', '$options': 'i'}},
+      { firstName: { '$regex': searchPhrase+'', '$options': 'i'}},
+      { lastName: { '$regex': searchPhrase+'', '$options': 'i'}}
+    ]};  
+  }
+  var filter = null;
+  if (searchPhrase.indexOf(' ')>0) {
+    var parts = searchPhrase.split(' ').filter(sp=>(sp!=''));
+    filter = parts.reduce((f,p)=>{
+      f.$and.push(makeFilter(p));
+      return f;
+    },{$and: []});
+  } else {
+    filter = makeFilter(searchPhrase);
+  }
   return User.find(filter, {email:1, firstName:1, middelName:1, lastName:1 });
 }
 

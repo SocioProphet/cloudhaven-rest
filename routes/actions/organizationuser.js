@@ -14,7 +14,13 @@ export class OrganizationUserMgr extends BaseAction{
   route() {
     this.get({path:'/currentuserorgs'}, (req, res) =>{
       User.findOne({_id:this.authData.user._id}, {orgMemberships:1})
-      .populate('orgMemberships.organization')
+      .populate({path:'orgMemberships.organization',
+        model:'Organization',
+        populate: {
+          path: 'groups.members',
+          model: 'User'
+        }
+      })
       .then(user =>{
         res.json({success:true, orgMemberships: user.orgMemberships});
       })

@@ -7,11 +7,11 @@ import mongoose from 'mongoose'
 export class OrganizationGroupMgr extends BaseAction{
   constructor(){
     super();
-    this.setRoles(Roles.SysAdmin, Roles.OrganizationAdmin);
+    this.setRoles(Roles.SysAdmin, Roles.User);
   }
   
   route() {
-    this.post({path:"/"}, (req, res) => {
+    this.post({path:"/", overrideRoles:['SYSADMIN', 'USER']}, (req, res) => {
       var group = req.body.organizationGroup;
       Organization.findOneAndUpdate(
         {_id:mongoose.Types.ObjectId(req.body.organizationId), groups: {$not:{$elemMatch: {name:group.name}}}},

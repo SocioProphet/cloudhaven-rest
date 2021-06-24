@@ -27,7 +27,8 @@ var organizationSchema = new Schema( {
         content: String
     }],
     groups:[{
-        name: {type: String, required: true}
+        name: {type: String, required: true},
+        members: [{ type:Schema.ObjectId, ref:'User' }]
     }]
 }, {timestamps:true});
 

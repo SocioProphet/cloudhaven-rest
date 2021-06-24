@@ -7,6 +7,7 @@ var FolderSchema = new Schema({
 //    group: { type:Schema.Object, ref:'Group'},
     firstComeFirstServe: {type: Boolean, default: false},
     organization: { type: Schema.ObjectId, ref: 'Organization'},
+    unassignedQueueGroupId: {type: String},
     applicationId: {type:String, default: ''},
     name: { type: String, required: true} //Folder name
 });
