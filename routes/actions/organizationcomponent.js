@@ -80,7 +80,7 @@ export class OrganizationComponentMgr extends BaseAction{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(
             { _id:mongoose.Types.ObjectId(req.body.organization_Id), 
-              components:{$not:{$elemMatch:{'componentId':component.componentId}}}}, 
+            components:{$not:{$elemMatch:{'componentId':component.componentId}}}}, 
             {$push:{components:component}}, {new:true})
         } else {
           var update = Object.keys(component).reduce((mp,fld)=>{
@@ -93,13 +93,13 @@ export class OrganizationComponentMgr extends BaseAction{
       })()
       .then(organization=>{
         if (!organization) {
-          res.json({success:false, errMsg:`Failed to ${operation} component.`});
+          res.json({success:false, errMsg:`Failed to ${operation} component (may be duplicate).`});
         } else {
           res.json({success:true, components:organization.components});
         }
       })
-      .catch(error=>{
-        console.log(error+'');
+      .then(null,/*fail(res)*/(error)=>{
+        console.log(error);
       })
     });
     this.delete({path:"/:organization_Id/:component_Id"}, (req, res) => {

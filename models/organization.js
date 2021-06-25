@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import User from'./user.js';
 var Schema = mongoose.Schema;
 
-var organizationSchema = new Schema( {
+var OrganizationSchema = new Schema( {
     name: { type: String, required: true, unique:true },
     organizationId: { type: String, required: true, unique: true},
     componentsUrl: String,
@@ -31,5 +31,5 @@ var organizationSchema = new Schema( {
         members: [{ type:Schema.ObjectId, ref:'User' }]
     }]
 }, {timestamps:true});
-
-export default mongoose.model( 'Organization', organizationSchema );
+OrganizationSchema.index({"organizationId": 1, "components.componentId": 1}, {unique: true});
+export default mongoose.model( 'Organization', OrganizationSchema );
