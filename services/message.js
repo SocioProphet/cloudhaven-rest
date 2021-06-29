@@ -66,12 +66,54 @@ obj.queueTask = function( params ) {
 obj.userCreateMsg = function( params ) {
   var promise = new Promise(function( resolve, reject) {
     var emailToUserMap = {};
-    var emails = params.recipients.map(r=>(_.isString(r)?r:r.email));
+    var organizationId = null;
+    var componentId = null;
+    var applicationId = null;
+    var emails = params.recipients.map((r)=>{
+      if (!_.isString(r)) {
+        if (!r.email) {
+          reject('No username (email) specified for recipient.');
+        }
+        if (!r.type) {
+          reject('No type (to, cc, bcc) specified for recipient.');
+        }
+      }
+      return _.isString(r)?r:r.email;
+    });
     if (!params.senderId && params.senderEmail) {
       emails.push( params.senderEmail );
     }
-    User.find({email:{ $in: emails}}, {_id:1, email:1})
-    .then(users=>{
+    var promises = [];
+    promises.push(User.find({email:{ $in: emails}}, {_id:1, email:1}));
+    if (params.application) {
+      var filter = {organizationId:params.application.organizationId};
+      if (params.application.applicationId) {
+        filter.applications = {$elemMatch:{applicationId:params.application.applicationId}};
+      } else if (params.application.componentId) {
+        filter.components = {$elemMatch:{componentId:params.application.componentId}};
+      } else {
+        reject('Missing applicationId or componentId');
+      }
+    }
+    promises.push(Organization.findOne(filter));
+    mongoose.Promise.all(promises)
+    .then(results=>{
+      if (results.length>1) {
+        var org = results[1];
+        if (!org) {
+          reject(`Unrecognized ${params.applicationId?'application':'component'}.`);
+        }
+        organizationId = org._id;
+        if (params.application.applicationId) {
+          var app = org.applications.find(a=>(a.applicationId==params.application.applicationId));
+          applicationId = app?app._id.toString():'';
+        } else if (params.application.componentId) {
+          var component = org.components.find(c=>(c.componentId)==params.application.componentId);
+          componentId = component?component._id.toString():'';
+
+        }
+      }
+      var users = results[0];
       var userIds = [];
       emailToUserMap = users.reduce((mp,u)=>{
         mp[u.email] = u;
@@ -104,10 +146,10 @@ obj.userCreateMsg = function( params ) {
         subject: params.subject||'',
         message: params.message||''
       };
-      if (params.organizationId) message.organization = params.organizationId;
-      if (params.applicationId) message.applicationId = params.applicationId;
-      if (params.componentId) message.componentId = params.componentId;
-      if (params.appConfigData) message.appConfigData = JSON.stringify(params.appConfigData);
+      if (params.application.organizationId) message.organization = organizationId;
+      if (params.application.applicationId) message.applicationId = applicationId;
+      if (params.application.componentId) message.componentId = componentId;
+      if (params.application.appConfigData) message.appConfigData = JSON.stringify(params.application.appConfigData);
   
       return Message.create(message);
     })
@@ -115,7 +157,7 @@ obj.userCreateMsg = function( params ) {
       resolve(newMsg);
     })
     .catch(err =>{
-      resolve(null);
+      reject(err);
     })
   });
   return promise;

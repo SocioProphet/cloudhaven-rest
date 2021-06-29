@@ -193,6 +193,24 @@ export class OrganizationAppMgr extends BaseAction{
       })
     })
 
+    this.get({path:'/getapp/:organizationId/:applicationId'}, (req, res)=>{
+      var filter = {_id:mongoose.Types.ObjectId(req.params.organizationId),
+                    applications: {$elemMatch:{_id:mongoose.Types.ObjectId(req.params.applicationId)}}};
+      Organization.findOne(filter)
+      .then(org=>{
+        if (org) {
+          var app = org.applications.find(a=>(a._id.toString()==req.params.applicationId));
+          res.json({success:true, app:app})
+        } else {
+          res.json({success:false, errMsg:'Application not recognized.'});
+        }
+      })
+      .catch(err =>{
+        res.json({success:false, errMsg:err});
+      })
+  
+    });
+
     this.get({path:'/applications', overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) =>{
       Organization.find({}, {name:1, organizationId:1, applications:1})
       .then(organizations =>{

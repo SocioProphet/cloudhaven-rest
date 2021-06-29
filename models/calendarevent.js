@@ -6,7 +6,7 @@ var sharingSchema = Sharing.schema;
 var CalendarEventSchema = new Schema({
     owner: {type: Schema.ObjectId, ref: 'User'},
     sharings: [sharingSchema],
-    type: { type: String, enum:['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Task', 'Birthday', 'Conference'], default: 'Event'},
+    type: { type: String, default: 'Event'},
     title: { type: String, required: true},
     content: { type: String, required: true },
     start: { type: Date, default: new Date() },

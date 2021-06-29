@@ -50,7 +50,7 @@ export class MessageMgr extends BaseAction {
         res.json({success: true, msg: newMsg});
       })
       .catch(err =>{
-        res.json({success:false, errMsg: 'Failed to create message'});
+        res.json({success:false, errMsg: err});
       })
     });
 

@@ -63,4 +63,3 @@ obj.userSearch = function( searchPhrase, dateOfBirth ) {
 }
 
 export default obj;
-
