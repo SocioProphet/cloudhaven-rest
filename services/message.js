@@ -37,32 +37,129 @@ obj.getFolderMsgs = function( userId, folderId ) {
     .populate({path: 'sharings.user', select:{name:1, firstName:1, middleName:1, lastName:1}})
 }
 
+
+obj.setTaskOutcome = function( pTaskId, resultStatus, resultText) {
+  var taskId = mongoose.Types.ObjectId(pTaskId);
+  return Message.updateOne({_id:taskId}, {$set:{isDone:true, resultStatus:resultStatus||'', resultMessage:resultText||''}})
+}
+
+obj.grabTask = function( pTaskId, pUserId ) {
+  var taskId = mongoose.Types.ObjectId(pTaskId);
+  var userId = mongoose.Types.ObjectId(pUserId);
+  return Message.updateOne({_id:taskId}, {$set:{sharings:[{user:userId, recipientType:'taskgroup'}]}})
+}
+
+obj.getTasksForUser = function( pUserId ) {
+  var userId = mongoose.Types.ObjectId(pUserId);
+  return Message.find({sharings:{$elemMatch:{recipientType:'taskgroup', user:userId}}})
+  .populate('organization')
+  .then(tasks=>{
+    return tasks.map((task)=>{
+      var t = task.toObject();
+      if (t.organization && t.applicationId) {
+        var app = Object.assign({organization:t.organization}, t.organization.applications.find((a)=>{
+          var aId = a._id.toString();
+          var taId = t.applicationId;
+          return aId == taId;
+//          a._id.toString()==t.applicationId
+        })||{})
+        var retTask = Object.assign({app:app}, t);
+        return retTask;
+      }
+    })
+  })
+}
+
 //Get all of the tasks for all of the groups for which a user is a member
 //params: userId
 obj.getUnassignedTasksForUser = function( pUserId ) {
   var userId = mongoose.Types.ObjectId(pUserId);
   return Organization.find({'groups.members':{$elemMatch:{$eq:userId}}})
   .then(orgs =>{
-    var groupIds = orgs.reduce((ar, o)=>{
-      ar = ar.concat(o.groups.filter(g=>(g.members.find(m=>(m.toString()==pUserId)))));
+    var groupMap = {};
+    var groupIds = orgs.reduce((ar,o)=>{
+      var org = o.toObject();
+      var groupsWithUser = org.groups.filter(g=>(g.members.find(m=>(m.toString()==pUserId))));
+      groupsWithUser.forEach(g=>{
+        groupMap[g._id.toString()] = Object.assign({groupOrg:o}, g);
+      })
+      var grpIds = groupsWithUser.map(g=>(g._id));
+      ar = ar.concat(grpIds);
       return ar;
-    },[]).map(g=>(g._id));
-    return Message.find({sharings:{$elemMatch:{recipientType:'taskqueue', groupId:{$in:groupIds}}}})
+    },[]);
+    return Message.find({sharings:{$elemMatch:{recipientType:'taskgroup', groupId:{$in:groupIds}}}})
+    .then(tasks=>{
+      return tasks.map((t)=>{
+        var task = _.omit(Object.assign({},t.toObject()), ['sharings']);
+        task.group = groupMap[t.sharings[0].groupId.toString()];
+        return task;
+      })
+    })
   })
 }
-//params: groupId, subject, message
-obj.queueTask = function( params ) {
-  return Message.create(
-    {
-      sharings:[{groupId:params.groupId, recipientType:'taskqueue'}],
-      subject: params.subject || '',
-      message: params.message || '',
-      applicationId: params.applicationId || ''
-    });
-}
 
-//params: senderId, recipients, folderName, subject, message
+//params: senderId, subject, message, taskGroup:{organizationId, groupName}, application:{organizationId, applicationId}
+obj.queueTask = function( params ) {
+  var promise = new Promise(function( resolve, reject) {
+    var orgIds = [params.taskGroup.organizationId];
+    if (params.application.organizationId!=params.taskGroup.organizationId) {
+      orgIds.push(params.application.organizationId);
+    }
+    var filter = {organizationId:{$in:orgIds}};
+    Organization.find(filter)
+    .then(orgs =>{
+      return orgs.reduce((mp,o)=>{
+        mp[o.organizationId] = o;
+        return mp;
+      },{})
+    })
+    .then(orgMap=>{
+      var groupOrg = orgMap[params.taskGroup.organizationId];
+      if (!groupOrg) {
+        reject(`Unrecognized task group organizationId (${params.taskGroup.organizationId}).`);
+        return;
+      }
+      var group = groupOrg.groups.find(g=>(g.name==params.taskGroup.groupName));
+      if (!group) {
+        reject(`Unrecognized task group name (${params.taskGroup.groupName}).`);
+        return;
+      }
+      var appOrg = orgMap[params.application.organizationId];
+      if (!appOrg) {
+        reject(`Unrecognized application organizationId (${params.application.organizationId}).`);
+        return;
+      }
+      var app = appOrg.applications.find(a=>(a.applicationId==params.application.applicationId));
+      if (!app) {
+        reject(`Unrecognized applicationId (${params.application.applicationId}).`);
+        return;
+      }
+      var sharing = {recipientType: 'taskgroup', organization:groupOrg._id, groupId:group._id}
+      var message = {
+        sendingUser: params.senderId,
+        sharings: [sharing],
+        subject: params.subject||'',
+        message: params.message||'',
+        organization: appOrg._id,
+        applicationId: app._id
+      };
+      if (params.application.appConfigData) message.appConfigData = JSON.stringify(params.application.appConfigData);  
+      return Message.create(message);
+    })
+    .then(newTask =>{
+      resolve(newTask);
+    })
+    .catch(err =>{
+      reject(err);
+    })
+  });
+  return promise;
+}
+  
+
+//params: senderId, recipients, taskGroup, folderName, subject, message
 //recipients: [{type: 'to|cc|bcc', email: <email>}, ...]
+//taskGroup: {organizationId:'', groupName:''}
 obj.userCreateMsg = function( params ) {
   var promise = new Promise(function( resolve, reject) {
     var emailToUserMap = {};
@@ -71,11 +168,15 @@ obj.userCreateMsg = function( params ) {
     var applicationId = null;
     var emails = params.recipients.map((r)=>{
       if (!_.isString(r)) {
-        if (!r.email) {
-          reject('No username (email) specified for recipient.');
-        }
         if (!r.type) {
           reject('No type (to, cc, bcc) specified for recipient.');
+        }
+        if (r.type == 'group') {
+
+        } else {
+          if (!r.email) {
+            reject('No username (email) specified for recipient.');
+          }
         }
       }
       return _.isString(r)?r:r.email;

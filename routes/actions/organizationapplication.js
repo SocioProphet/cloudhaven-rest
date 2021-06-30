@@ -214,10 +214,11 @@ export class OrganizationAppMgr extends BaseAction{
     this.get({path:'/applications', overrideRoles:[Roles.SysAdmin, Roles.User]}, (req, res) =>{
       Organization.find({}, {name:1, organizationId:1, applications:1})
       .then(organizations =>{
-        var applications = organizations.reduce((ar, o)=>{
-          ar = ar.concat(o.applications.filter(a=>(a.status=='Published')).map((a)=>{
-            var app = Object.assign({key:o.name+':'+a.name , organizationId:o._id}, a.toObject());
-            app.organizationName = o.name;
+        var applications = organizations.reduce((ar, org)=>{
+          var o = org.toObject();
+          o = {_id:o._id, organizationId: o.organizationId, name:o.name};
+          ar = ar.concat(org.applications.filter(a=>(a.status=='Published')).map((a)=>{
+            var app = Object.assign({key:o.name+':'+a.name , organization:o}, a.toObject());
             app.logo = a.logo;
             return app;
           })||[]);

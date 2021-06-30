@@ -17,6 +17,7 @@ var MessageSchema = new Schema({
     appConfigData: String, //any string value including stringified JSON
     wasRead: {type: Boolean, default: true},
     isDone: {type: Boolean, default: false},
+    resultStatus: {type: String, enum:['Incomplete', 'Completed']},
     resultMessage: String,
     schedule: scheduleItemSchema
 });

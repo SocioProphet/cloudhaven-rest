@@ -21,6 +21,36 @@ export class MessageMgr extends BaseAction {
       .then(null, fail(res));
     });
 
+    this.post({path:'/settaskoutcome'}, (req,res) =>{
+      MessageSrvc.setTaskOutcome(req.body.taskId, req.body.resultStatus, req.body.resultText)
+      .then(result =>{
+        res.json({success:result.ok==1, errMsg:result.ok==1?'Grab failed':''});
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error+''});
+      })
+    });
+
+    this.get({path:'/grabtask/:taskId/:userId'}, (req,res) =>{
+      MessageSrvc.grabTask(req.params.taskId, req.params.userId)
+      .then(result =>{
+        res.json({success:result.ok==1, errMsg:result.ok==1?'Grab failed':''});
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error+''});
+      })
+    });
+
+    this.get({path:'/gettasksforuser/:userId'}, (req,res) =>{
+      MessageSrvc.getTasksForUser(req.params.userId)
+      .then(tasks =>{
+        res.json({success:true, tasks:tasks});
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error+''});
+      })
+    });
+
     this.get({path:'/getunassignedtasksforuser/:userId'}, (req,res) =>{
       MessageSrvc.getUnassignedTasksForUser(req.params.userId)
       .then(tasks =>{

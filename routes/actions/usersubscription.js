@@ -52,7 +52,7 @@ export class UserSubscription extends BaseAction{
     //unsubscribe
     this.delete({path:"/:userId/:organizationId/:applicationId"}, (req, res) => {
       User.updateOne( {_id:mongoose.Types.ObjectId(req.params.userId)}, 
-        {$pull:{subscribedApps:{application:req.params.applicationId}}} )
+        {$pull:{subscribedApps:{organization:req.params.organizationId, application:req.params.applicationId}}} )
       .then(result=>{
         if (result && result.n>0) {
           res.json({success:true});
