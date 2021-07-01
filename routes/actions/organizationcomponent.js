@@ -15,7 +15,6 @@ export class OrganizationComponentMgr extends BaseAction{
     //Get organization component details
     //status, organizationComps:[{organizationId:'', componentId:''}, ...]}
     this.post({path:"/getcomponents"}, (req, res) => {
-      var operation = req.body.operation;
       var organizationComponents = req.body.organizationComps.reduce((mp,e)=>{
         var compList = mp[e.organizationId] || (mp[e.organizationId] = []);
         compList.push(e.componentId);
@@ -24,8 +23,8 @@ export class OrganizationComponentMgr extends BaseAction{
       var organizationIds = Object.keys(organizationComponents);
       Organization.find({organizationId:{$in:organizationIds}}, {_id:1, organizationId:1, components:1, componentsUrl:1})
       .then((organizations)=>{
-        if (!organizations) {
-          res.json({success:false, errMsg:`Failed to ${operation} component.`});
+        if (!organizations || organizations.length<organizationIds.lengrh) {
+          res.json({success:false, errMsg:'Failed to find all component organizations.'});
         } else {
           var promises = [];
           var localStoredComponents = [];

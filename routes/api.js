@@ -21,6 +21,7 @@ import { OrganizationGroupMgr } from './actions/organizationgroup'
 import { UserSubscription } from './actions/usersubscription'
 import { OrganizationAppMgr } from './actions/organizationapplication'
 import { OrganizationComponentMgr } from './actions/organizationcomponent'
+import { OrganizationMixinMgr } from './actions/organizationmixin'
 import { ChangePassword } from './actions/chgpwd'
 import cityStateLookup from '../services/citystatelookup'
 import { AuditLogReview } from './actions/auditlogreview'
@@ -251,6 +252,7 @@ export default function() {
     router.use( '/usersubscription', new UserSubscription().route());
     router.use( '/organizationapplication', new OrganizationAppMgr().route());
     router.use( '/organizationcomponent', new OrganizationComponentMgr().route());
+    router.use( '/organizationmixin', new OrganizationMixinMgr().route());
     router.use( '/chgpwd', new ChangePassword().route());
     
     

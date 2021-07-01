@@ -26,6 +26,14 @@ var OrganizationSchema = new Schema( {
         documentation: { type:  String},
         content: String
     }],
+    mixins:[{
+        mixinId: { type: String, required: true},
+        source: {type: String, enum: ['App Server', 'CloudHaven'], default:'CloudHaven'},
+        status: {type: String, required: true, enum:['Draft', 'Published'], default: 'Draft'},
+        keywords: [String],
+        documentation: { type:  String},
+        content: String
+    }],
     groups:[{
         name: {type: String, required: true},
         members: [{ type:Schema.ObjectId, ref:'User' }]
