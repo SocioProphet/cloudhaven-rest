@@ -16,6 +16,7 @@ var MessageSchema = new Schema({
     componentId: {type:String, default: ''},
     appConfigData: String, //any string value including stringified JSON
     wasRead: {type: Boolean, default: true},
+    saveGroupId: {type: String},
     isDone: {type: Boolean, default: false},
     resultStatus: {type: String, enum:['Incomplete', 'Completed']},
     resultMessage: String,

@@ -46,7 +46,21 @@ obj.setTaskOutcome = function( pTaskId, resultStatus, resultText) {
 obj.grabTask = function( pTaskId, pUserId ) {
   var taskId = mongoose.Types.ObjectId(pTaskId);
   var userId = mongoose.Types.ObjectId(pUserId);
-  return Message.updateOne({_id:taskId}, {$set:{sharings:[{user:userId, recipientType:'taskgroup'}]}})
+  return Message.findOne({_id:taskId}, {sharings:1})
+  .then(task=>{
+    var saveGroupId = task.sharings[0].groupId;
+    return Message.updateOne({_id:taskId}, {$set:{saveGroupId:saveGroupId, sharings:[{user:userId, recipientType:'taskgroup'}]}})
+  })
+}
+
+obj.returnTaskToQueue = function( pTaskId ) {
+  var taskId = mongoose.Types.ObjectId(pTaskId);
+  var userId = mongoose.Types.ObjectId(pUserId);
+  return Message.findOne({_id:taskId}, {saveGroupId:1})
+  .then(task=>{
+    var saveGroupId = task.saveGroupId;
+    return Message.updateOne({_id:taskId}, {$set:{sharings:[{groupId:saveGroupId, recipientType:'taskgroup'}]}})
+  })
 }
 
 obj.getTasksForUser = function( pUserId ) {

@@ -31,6 +31,16 @@ export class MessageMgr extends BaseAction {
       })
     });
 
+    this.get({path:'/returntasktoqueue/:taskId'}, (req,res) =>{
+      MessageSrvc.returnTaskToQueue(req.params.taskId)
+      .then(result =>{
+        res.json({success:result.ok==1, errMsg:result.ok==1?'Grab failed':''});
+      })
+      .catch(error =>{
+        res.json({success:false, errMsg:error+''});
+      })
+    });
+
     this.get({path:'/grabtask/:taskId/:userId'}, (req,res) =>{
       MessageSrvc.grabTask(req.params.taskId, req.params.userId)
       .then(result =>{
