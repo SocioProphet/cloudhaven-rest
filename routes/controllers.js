@@ -44,14 +44,15 @@ export class UserController extends BaseController{
   }
   delete(id) {
     return mongoose.Promise.all([
-      AuditLog.find({user:id})
+//      AuditLog.find({user:id})
+      AuditLog.deleteMany({user:id})
     ])
     .then(results=>{
-      if (results[1].length>0) {
+/*      if (results[1].length>0) {
         return mongoose.Promise.reject({name:'ValidationError', message:'In use - delete not allowed.'});
-      } else {
+      } else {*/
         return super.delete(id);
-      }
+//      }
    })
   }
 }

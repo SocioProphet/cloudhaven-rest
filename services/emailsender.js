@@ -2,14 +2,20 @@ import nodemailer from 'nodemailer'
 
 var obj = {};
 obj.sendAccountVerificationEmail = function (params) {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVER,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_SENDER,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  });
+  console.log('sending acct verify email: '+JSON.stringify(params));
+  var transporter = null;
+  try {
+    transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_SERVER,
+      port: process.env.EMAIL_PORT,
+      auth: {
+        user: process.env.EMAIL_SENDER,
+        pass: process.env.EMAIL_PASSWORD
+      }
+    });
+  } catch (e) {
+    console.log('createTransport Exception: '+e);
+  }
   transporter.sendMail({
     from: params.senderEmail || process.env.EMAIL_SENDER,
     to: params.email,
@@ -23,7 +29,7 @@ obj.sendAccountVerificationEmail = function (params) {
   `
   })
   .then(result =>{
-
+    console.log("Result: "+JSON.stringify(result));
   })
   .catch(err =>{
     console.log('Email send error: '+err);

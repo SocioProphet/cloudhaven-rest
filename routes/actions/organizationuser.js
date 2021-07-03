@@ -30,9 +30,16 @@ export class OrganizationUserMgr extends BaseAction{
     });
 
     this.post({path:'/createorg'}, (req, res) =>{
-      Organization.create({
-        name: req.body.name,
-        organizationId: req.body.organizationId})
+      Organization.findOne({$or:[{name:{$eq:req.body.name}},{organizationId:{$eq:req.body.organizationId}}]})
+      .then(foundOrg=>{
+        if (foundOrg) {
+          return foundOrg
+        } else {
+          return Organization.create({
+            name: req.body.name,
+            organizationId: req.body.organizationId})
+        }
+      })
       .then(org=>{
         if (org) {
           User.findOneAndUpdate({
