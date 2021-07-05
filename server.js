@@ -29,7 +29,7 @@ console.log(JSON.stringify(args));
 
 const DIST_DIR = path.join(__dirname, "dist");
 const PORT = 3000;
-const useSSL = false; //process.env.NODE_ENV != 'development'; //args.find(a=>(a.toLowerCase()=='-usessl'))!=null;
+const useSSL = true; //process.env.NODE_ENV != 'development'; //args.find(a=>(a.toLowerCase()=='-usessl'))!=null;
 
 mongoose.connect(config.database, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }, (err) => {
   if (err)
@@ -51,15 +51,28 @@ var logger0 = function(req, res, next) {
 spaApp.use(logger0);
 
 var key_config = null;
+/*
+var options = {
+  key: fs.readFileSync('copperCerts/privkey1.pem'),
+  cert: fs.readFileSync('copperCerts/cert1.pem'),
+  ca: [
+    fs.readFileSync('copperCerts/root.pem', 'utf8'),
+    fs.readFileSync('copperCerts/chain.pem', 'utf8')
+  ]
+};
+*/
 if (useSSL) {
-  key_config = {
-//    pfx: fs.readFileSync('demo_surgicalrecoverysuites_com.pfx'),
-    key: fs.readFileSync('demo_cloudhaven_com.key'),
-    cert: fs.readFileSync('demo_cloudhaven_com.crt'),
-    ca:[
-      fs.readFileSync('TrustedRoot.crt'),
-      fs.readFileSync('DigiCertCA.crt')
-    ]
+  try {
+    key_config = {
+      key: fs.readFileSync('privkey.pem'),
+      cert: fs.readFileSync('cert.pem'),
+      ca:[
+        fs.readFileSync('fullchain.pem'),
+        fs.readFileSync('chain.pem')
+      ]
+    }
+  } catch (e) {
+    console.log('Failed to read a pem file: '+e);
   }
   https.createServer(key_config, spaApp)
   .listen(443, function () {

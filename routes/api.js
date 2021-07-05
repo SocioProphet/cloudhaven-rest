@@ -84,7 +84,7 @@ export default function() {
           if (err.name == 'ValidationError') {
             res.json({success:false, errMsg: err.message})
           } else if (err.name == 'MongoError' && err.code == 11000) {
-            res.json({success: false, msg: `A user with email ${req.body.email} already exists - please use a different email.`});
+            res.json({success: false, errMsg: `A user with email ${req.body.email} already exists - please use a different email.`});
           } else {
             res.json({success:false, errMsg: err.message})
           }
@@ -129,14 +129,17 @@ export default function() {
       .then(result =>{
         var badCodeHTML = `
         <html>
+        <head>
+          <meta http-equiv="Refresh" content="0; url='${process.env.CLIENT_DOMAIN}?verifyexpired=true'" />
+        </head>
         <body>
           <p>This account verification link is not valid (expires after 10 minutes).</p>
         </body>
-      </html>`;
+        </html>`;
         var redirectHTML = `
         <html>
         <head>
-          <meta http-equiv="refresh" content="0; URL=${process.env.CLIENT_DOMAIN}" />
+          <meta http-equiv="refresh" content="0; URL='${process.env.CLIENT_DOMAIN}?fromemailverify=true" />
         </head>
         <body>
           <p>If you are not redirected in five seconds, <a href="${process.env.CLIENT_DOMAIN}">click here</a>.</p>
@@ -208,7 +211,7 @@ export default function() {
     
     router.post('/login', (req, res) => {
       User.findOne({email: req.body.email},
-        {email:1, password:1, status:1, firstName:1, middleName:1, lastName:1, name:1, roles:1})
+        {email:1, password:1, status:1, firstName:1, middleName:1, lastName:1, name:1, roles:1, subscribedApps:1})
       .then(user => {
         if (!user) {
           res.status(401).send({success: false, msg: 'Authentication failed. User not found.'});
