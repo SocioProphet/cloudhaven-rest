@@ -2,7 +2,6 @@ import nodemailer from 'nodemailer'
 
 var obj = {};
 obj.sendAccountVerificationEmail = function (params) {
-  console.log('sending acct verify email: '+JSON.stringify(params));
   var transporter = null;
   try {
     transporter = nodemailer.createTransport({

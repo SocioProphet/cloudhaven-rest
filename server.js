@@ -9,10 +9,7 @@ import passport from 'passport';
 import config from './config/database';
 import cors from 'cors';
 
-
 import User from './models/user.js'
-import emailSender from './services/emailsender.js'
-console.log('emailSender:'+JSON.stringify(emailSender));
 
 //import pdf from 'express-pdf'
 //express-pdf uses html-pdf which has a critical vulnerability, however the way this application
@@ -21,6 +18,7 @@ console.log('emailSender:'+JSON.stringify(emailSender));
 
 import fs from 'fs'
 import https from 'https'
+import http from 'http'
 
 import api  from './routes/api';
 
@@ -41,6 +39,15 @@ mongoose.connect(config.database, {useNewUrlParser: true, useUnifiedTopology: tr
 var spaServer = null;
 const spaApp = express();
 console.log(__dirname + '\\spa');
+spaApp.use (function (req, res, next) {
+  if (req.secure) {
+          // request was via https, so do no special handling
+          next();
+  } else {
+          // request was via http, so redirect to https
+          res.redirect('https://' + req.headers.host + req.url);
+  }
+});
 spaApp.use(express.static(__dirname + '\\spa'));
 var logger0 = function(req, res, next) {
   console.log('Req:'+req.method);
@@ -49,6 +56,7 @@ var logger0 = function(req, res, next) {
   next(); // Passing the request to the next handler in the stack.
 }
 spaApp.use(logger0);
+spaApp.enable("trust proxy");
 
 var key_config = null;
 /*
@@ -74,10 +82,12 @@ if (useSSL) {
   } catch (e) {
     console.log('Failed to read a pem file: '+e);
   }
-  https.createServer(key_config, spaApp)
-  .listen(443, function () {
+  var server = http.createServer(spaApp);
+  var secureServer = https.createServer(key_config, spaApp);
+  secureServer.listen(443, function () {
     console.log('SPA app listening on port 443 with SSL.')
   })
+  server.listen(80);
 } else {
   console.log('SPA running on port 80')
   spaServer = spaApp.listen(80);
