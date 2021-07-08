@@ -277,7 +277,7 @@ obj.userCreateMsg = function( params ) {
   });
   return promise;
 }
-obj.delete = function(msgId, folderId, userId) {
+obj.trashMessage = function(msgId, folderId, userId) {
   if (_.isString(msgId)) msgId = mongoose.Types.ObjectId(msgId);
   if (_.isString(userId)) userId = mongoose.Types.ObjectId(userId);
   if (_.isString(folderId)) folderId = mongoose.Types.ObjectId(folderId);
@@ -311,7 +311,10 @@ obj.delete = function(msgId, folderId, userId) {
       resolve(false);
     })
   })
-  return promise;
+  obj.deleteMessageOrTask = function(msgId) {
+    if (_.isString(msgId)) msgId = mongoose.Types.ObjectId(msgId);
+    return Message.deleteOne( {_id: msgId});
+  }
 }
 
 export default obj;

@@ -103,10 +103,24 @@ export class MessageMgr extends BaseAction {
         res.json({success:false, errMsg: 'Failed to create message'});
       })
     });
+
     this.delete({path:'/userdeletemsg/:userId/:folderId/:msgId'}, (req, res) => {
-      MessageSrvc.delete(req.params.msgId, req.params.folderId, req.params.userId)
+      MessageSrvc.trashMessage(req.params.msgId, req.params.folderId, req.params.userId)
       .then(result =>{
         res.json({success:result});
+      })
+      .catch(err =>{
+        res.json({success:false, errMsg: 'Failed to trash message'});
+      })
+    })
+
+    this.delete({path:'/deletemsgortask/:messageId'}, (req, res)=>{
+      MessageSrvc.deleteMessageOrTask( req.params.messageId )
+      .then(result =>{
+        res.json({success:result});
+      })
+      .catch(err =>{
+        res.json({success:false, errMsg: 'Failed to delete message'});
       })
     })
    return this.router;
