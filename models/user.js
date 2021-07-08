@@ -15,6 +15,7 @@ var UserSchema = new Schema({
   ssn: String,
   language: { type: String, required: true, enum: ['English', 'Spanish'], default:'English' },
   roles: [{type:String, enum: ['SYSADMIN', 'USER']}],
+  homePage: {type: String, default: 'Welcome'},
   orgMemberships: [{
     isAdmin: {type: Boolean, default: false},
     organization: { type:Schema.ObjectId, ref:'Organization', required: false }

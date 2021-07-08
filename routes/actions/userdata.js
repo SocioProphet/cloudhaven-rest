@@ -10,7 +10,7 @@ import fileUpload from 'express-fileupload'
 import mammoth from 'mammoth';
 import moment from 'moment';
 
-var coreUserFields = ["email", "firstName", "middleName", "lastName", "dateOfBirth", "ssn", "language"];
+var coreUserFields = ["email", "firstName", "middleName", "lastName", "dateOfBirth", "ssn", "language", "homePage"];
 
 function sendResponse( res, userFile, data) {
   var filename = userFile.name+'-_-_-'+userFile.fileName;
