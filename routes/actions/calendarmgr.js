@@ -42,7 +42,7 @@ export class CalendarMgr extends BaseAction {
       var params = Object.assign(req.body, {start:start, end:end});
       CalendarSrvc.appCreateEvent( params )
       .then(newEvent =>{
-        res.json({success: true, msg: newEvent});
+        res.json({success: true, newEvent: newEvent});
       })
       .catch(err =>{
         res.json({success:false, errMsg: 'Failed to create event'});
