@@ -10,11 +10,14 @@ import config from './config/database';
 import cors from 'cors';
 
 import User from './models/user.js'
+import {  getLinks } from './js/getvuetifyapidata.js'
 
 //import pdf from 'express-pdf'
 //express-pdf uses html-pdf which has a critical vulnerability, however the way this application
 //uses this package is safe and this vulnerability can be ignored
 
+
+getLinks();
 
 import fs from 'fs'
 import https from 'https'
