@@ -4,26 +4,26 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 
+import config from './config/database';
 import mongoose from 'mongoose';
 import passport from 'passport';
-import config from './config/database';
 import cors from 'cors';
 
 import User from './models/user.js'
-import {  getLinks } from './js/getvuetifyapidata.js'
 
 //import pdf from 'express-pdf'
 //express-pdf uses html-pdf which has a critical vulnerability, however the way this application
 //uses this package is safe and this vulnerability can be ignored
 
 
-getLinks();
-
 import fs from 'fs'
 import https from 'https'
 import http from 'http'
 
 import api  from './routes/api';
+//import processDocs from './vuetifydocs/process.js';
+
+
 
 const args = process.argv.slice(2);
 console.log(JSON.stringify(args));
@@ -33,10 +33,12 @@ const PORT = 3000;
 const useSSL = false; //process.env.NODE_ENV != 'development'; //args.find(a=>(a.toLowerCase()=='-usessl'))!=null;
 
 mongoose.connect(config.database, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }, (err) => {
-  if (err)
+  if (err) {
       console.error(err);
-  else
-      console.log("Connected to the mongodb"); 
+  } else {
+      console.log("Connected to the mongodb");
+//      processDocs();
+  }
 });
 
 var spaServer = null;

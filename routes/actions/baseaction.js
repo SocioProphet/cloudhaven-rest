@@ -15,10 +15,6 @@ export default class BaseController{
         this.roles = [];
     }
     setRoles() {
-      if (!arguments) {
-        var x = '';
-        
-      }
       for (var i=0; i < arguments.length; i++) {
         this.roles.push(arguments[i]);
       }

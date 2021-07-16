@@ -23,6 +23,7 @@ import { OrganizationAppMgr } from './actions/organizationapplication'
 import { OrganizationComponentMgr } from './actions/organizationcomponent'
 import { OrganizationMixinMgr } from './actions/organizationmixin'
 import { ChangePassword } from './actions/chgpwd'
+import { MetaDataMgr } from './actions/componentmetadata'
 import cityStateLookup from '../services/citystatelookup'
 import { AuditLogReview } from './actions/auditlogreview'
 import { EventLogReview } from './actions/eventlogreview'
@@ -249,6 +250,7 @@ export default function() {
     router.use( '/messagemgr', new MessageMgr().route());
     router.use( '/calendarmgr', new CalendarMgr().route());
     router.use( '/conversation', new ConversationMgr().route());
+    router.use( '/componentmetadata', new MetaDataMgr().route());
     router.use( '/reports', new Reports().route());
     router.use( '/organizationuser', new OrganizationUserMgr().route());
     router.use( '/organizationgroup', new OrganizationGroupMgr().route());

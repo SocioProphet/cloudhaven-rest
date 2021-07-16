@@ -79,7 +79,6 @@ exports.list_item_subtitle = require("./list-item-subtitle.js");
 exports.list_item_title = require("./list-item-title.js");
 exports.list_item = require("./list-item.js");
 exports.list = require("./list.js");
-exports.list.txt = require("./list.txt.js");
 exports.main = require("./main.js");
 exports.menu_transition = require("./menu-transition.js");
 exports.menu = require("./menu.js");
