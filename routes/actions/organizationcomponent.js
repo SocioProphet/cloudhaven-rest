@@ -74,7 +74,8 @@ export class OrganizationComponentMgr extends BaseAction{
     this.post({path:"/"}, (req, res) => {
       var operation = req.body.operation;
       var component = {componentId: req.body.componentId, source: req.body.source, status: 
-        req.body.status, keywords: req.body.keywords, documentation:req.body.documentation, content: req.body.content};
+        req.body.status, keywords: req.body.keywords, documentation:req.body.documentation, content: req.body.content,
+        props:JSON.parse(req.body.props), slots:JSON.parse(req.body.slots), events:JSON.parse(req.body.events)};
       (()=>{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(
@@ -148,14 +149,14 @@ db.organizations.find({components:{$elemMatch:{$and:[
       if (req.body.nameFilter) {
         filter.components.$elemMatch.$and.push({componentId:{$regex:req.body.nameFilter}});
       }
-      Organization.find(filter, {name:1, organizationId:1, components:{componentId:1, keywords:1, documentation:1}})
+      Organization.find(filter, {name:1, organizationId:1, components:{componentId:1, keywords:1, documentation:1, props:1, slots:1, events:1}})
       .then(orgs=>{
         var components = orgs.reduce((ar, org) => {
           org.components.forEach(comp => {
             if (!req.body.keywords || req.body.keywords.length==0 || _.intersection([req.body.keywords,comp.keywords]).length>0) {
               if (!req.body.nameFilter || comp.componentId.indexOf(req.body.nameFilter)>=0) {
                 var obj = {organizationName: org.name, organizationId: org.organizationId,
-                  componentId:comp.componentId, documentation: comp.documentation};
+                  componentId:comp.componentId, documentation: comp.documentation, props:comp.props, slots: comp.slots, events:comp.events};
                 obj.key = obj.organizationName+'-'+obj.componentId;
                 ar.push(obj);
               }

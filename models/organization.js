@@ -24,7 +24,21 @@ var OrganizationSchema = new Schema( {
         status: {type: String, required: true, enum:['Draft', 'Published'], default: 'Draft'},
         keywords: [String],
         documentation: { type:  String},
-        content: String
+        content: String,
+        props: [{
+            name: {type: String, required: true},
+            dataType: String,
+            defaultValue: String,
+            description: String
+          }],
+          slots: [{
+            name: {type: String, required: true},
+            description: String
+          }],
+          events: [{
+            name: {type: String, required: true},
+            description: String
+          }]        
     }],
     mixins:[{
         mixinId: { type: String, required: true},
