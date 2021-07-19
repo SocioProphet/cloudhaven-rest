@@ -30,7 +30,7 @@ console.log(JSON.stringify(args));
 
 const DIST_DIR = path.join(__dirname, "dist");
 const PORT = 3000;
-const useSSL = false; //process.env.NODE_ENV != 'development'; //args.find(a=>(a.toLowerCase()=='-usessl'))!=null;
+const useSSL = true; //process.env.NODE_ENV != 'development'; //args.find(a=>(a.toLowerCase()=='-usessl'))!=null;
 
 mongoose.connect(config.database, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false }, (err) => {
   if (err) {

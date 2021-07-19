@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer'
 
-var obj = {};
-obj.sendAccountVerificationEmail = function (params) {
+function getTransporter() {
   var transporter = null;
   try {
     transporter = nodemailer.createTransport({
@@ -15,6 +14,24 @@ obj.sendAccountVerificationEmail = function (params) {
   } catch (e) {
     console.log('createTransport Exception: '+e);
   }
+  return transporter;
+}
+var obj = {};
+obj.sendSupportEmail = function( senderEmail, message ) {
+  const transporter = getTransporter();
+  if (!transporter || !senderEmail || !message) return null;
+  return transporter.sendMail({
+    from: process.env.EMAIL_SENDER,
+    to: 'support@cloudhaven.net',
+    subject: 'CloudHaven support, etc. request',
+    text: 'From: '+senderEmail + '\n'+message
+  })
+
+}
+
+obj.sendAccountVerificationEmail = function (params) {
+  const transporter = getTransporter();
+  if (!transorter) return;
   transporter.sendMail({
     from: params.senderEmail || process.env.EMAIL_SENDER,
     to: params.email,
@@ -35,14 +52,8 @@ obj.sendAccountVerificationEmail = function (params) {
   })
 }
 obj.sendPasswordResetEmail = function (params) {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVER,
-    port: process.env.EMAIL_PORT,
-    auth: {
-      user: process.env.EMAIL_SENDER,
-      pass: process.env.EMAIL_PASSWORD
-    }
-  });
+  const transporter = getTransporter();
+  if (!transorter) return;
   transporter.sendMail({
     from: params.senderEmail || process.env.EMAIL_SENDER,
     to: params.email,

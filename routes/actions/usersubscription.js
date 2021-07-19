@@ -3,6 +3,7 @@ import {fail} from "../../js/utils"
 import User from '../../models/user'
 import Roles from '../../models/workflowroles'
 import mongoose from 'mongoose'
+import emailSender from '../../services/emailsender'
 
 export class UserSubscription extends BaseAction{
   constructor(){
@@ -62,6 +63,16 @@ export class UserSubscription extends BaseAction{
         res.json({success:false, errMsg:error});
       })
     });
+
+    this.post({path:'/supportmessage'}, (req, res)=>{
+      emailSender.sendSupportEmail( req.body.email, req.body.message)
+      .then(result =>{
+        res.json({success:result!=null});
+      })
+      .catch(err =>{
+        res.json({success:false, errMsg:err+''});
+      })
+    })
 
     return this.router;
   }
