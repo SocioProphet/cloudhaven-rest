@@ -31,7 +31,7 @@ obj.sendSupportEmail = function( senderEmail, message ) {
 
 obj.sendAccountVerificationEmail = function (params) {
   const transporter = getTransporter();
-  if (!transorter) return;
+  if (!transporter) return;
   transporter.sendMail({
     from: params.senderEmail || process.env.EMAIL_SENDER,
     to: params.email,
@@ -53,7 +53,7 @@ obj.sendAccountVerificationEmail = function (params) {
 }
 obj.sendPasswordResetEmail = function (params) {
   const transporter = getTransporter();
-  if (!transorter) return;
+  if (!transporter) return;
   transporter.sendMail({
     from: params.senderEmail || process.env.EMAIL_SENDER,
     to: params.email,

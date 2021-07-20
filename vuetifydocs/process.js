@@ -1,10 +1,10 @@
-/*const docs = require("./index.js");
+const docs = require("./index.js");
 const cheerio = require('cheerio');
 import ComponentMetaData from '../models/componentmetadata'
-import promiseSequential from 'promise-sequential';*/
+import promiseSequential from 'promise-sequential';
 
 function process() {
-/*  var list = Object.keys(docs);
+  var list = Object.keys(docs);
   var promises = [];
   var components = [];
   list.forEach(componentName=>{
@@ -20,13 +20,9 @@ function process() {
       var tdList = $(tr).not(".extra-row").find("td");
       propObj.name = $(tdList[0]).find("a").text();
       if (propObj.name) {
-        if (propObj.name == 'border') {
-          var x = '';
-          var y = x;
-        }
         props.push(propObj);
-        propObj.dataType = $(tdList[1]).find("span").text();
-        propObj.defaultValue = $(tdList[2]).find("span").text();
+        propObj.dataType = $(tdList[1]).text();
+        propObj.defaultValue = $(tdList[2]).text();
         propObj.description = $(tdList[3]).find("p").html();
       }
     })
@@ -73,7 +69,7 @@ function process() {
   .catch(err=>{
     console.log(err);
   })
-*/
+
 }
 
 
