@@ -37,8 +37,7 @@ export class OrganizationAppMgr extends BaseAction{
         if (operation == 'add') {
           return Organization.findOneAndUpdate(
             { _id:mongoose.Types.ObjectId(req.body.organization_Id), 
-//              applications:{$not:{$elemMatch:{'applications.applicationId':application.applicationId}}}}, 
-              applications:{$not:{$elemMatch:{'_id':appId}}}}, 
+              applications:{$not:{$elemMatch:{'applicationId':application.applicationId}}}}, 
             {$push:{applications:application}}, {new:true})
         } else {
           var update = Object.keys(application).reduce((mp,fld)=>{
@@ -51,7 +50,7 @@ export class OrganizationAppMgr extends BaseAction{
       })()
       .then(organization=>{
         if (!organization) {
-          res.json({success:false, errMsg:`Failed to ${operation} application.`});
+          res.json({success:false, errMsg:`Failed to ${operation} application (duplicate on applicationId?).`});
         } else {
           res.json({success:true, applications:organization.applications});
         }
