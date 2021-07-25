@@ -33,7 +33,11 @@ export class OrganizationUserMgr extends BaseAction{
       Organization.findOne({$or:[{name:{$eq:req.body.name}},{organizationId:{$eq:req.body.organizationId}}]})
       .then(foundOrg=>{
         if (foundOrg) {
-          return foundOrg
+          if (req.body.joinExisting) {
+            return foundOrg;
+          } else {
+            return null;
+          }
         } else {
           return Organization.create({
             name: req.body.name,
@@ -50,7 +54,7 @@ export class OrganizationUserMgr extends BaseAction{
             res.json({success:true, newUser:newUser});
           })
         } else {
-          res.json({success:false, errMsg:"An organization with this name or Id already exists"});
+          res.json({success:false, orgAlreadyExists:true});
         }
       })
       .catch(error =>{
